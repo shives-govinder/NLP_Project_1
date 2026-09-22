@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.DS_Store
+wandb/
+checkpoints/
+*.pt
+results/*
+!results/.gitkeep
+# course brief kept local (remove this line to share it via the repo)
+*.pdf

@@ -1,0 +1,23 @@
+# Default experiment configuration. Copy and edit for new experiments.
+n_symbols: 32
+n_labels: 8
+n_pairs: 8
+d_model: 64
+n_heads: 4
+n_layers: 2
+d_mlp: 256
+attention_only: false
+dropout: 0.0
+tie_weights: true
+steps: 3000
+batch_size: 256
+lr: 0.0003
+weight_decay: 0.01
+eval_every: 250
+eval_batches: 20
+seed: 0
+device: cpu
+n_generations: 5
+variant: base
+collapse_batches: 40
+collapse_temperature: 1.0
