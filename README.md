@@ -25,13 +25,26 @@ All commands run from the repo root.
 | What | Command |
 |---|---|
 | Sanity check (about 1 minute; run this first) | `python scripts/smoke_test.py` |
-| Train one model (base ICL task) | `python -m src.train` |
-| Attention-only variant (cleaner circuit) | `python -m src.train --attention_only` |
-| Use a config file | `python -m src.train --config config.yaml` |
-| Model-collapse run, base variant | `python -m src.collapse --variant base --n_generations 5` |
+| Train the base model (recommended setting) and save it | `python -m src.train --steps 20000 --lr 0.001 --n_unique 4 --dense_loss --device mps --save results/base.pt` |
+| Same, attention-only | add `--attention_only` and save to `results/base_attn.pt` |
+| Original single-query setting (plateaus; keep as a documented negative result) | `python -m src.train --steps 20000 --lr 0.001 --device mps` |
+| Interpretability on a saved model | `python scripts/analyse.py results/base.pt` |
+| Model-collapse run, base variant | `python -m src.collapse --variant base --n_generations 5 --n_unique 4 --dense_loss --lr 0.001 --device mps` |
 | Log to Weights & Biases | add `--wandb` to `src.train` (install `wandb` first) |
 
-A healthy base run should reach well above chance (1/8 = 0.125) on validation accuracy. Induction heads usually appear as a sudden drop in loss partway through training (a phase change). If accuracy stays at chance, increase `steps` or try `--attention_only`.
+`--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU.
+
+### Reading the numbers: the no-induction ceiling
+
+A model without an induction circuit can still beat chance by guessing labels that appear often in the context. Treat accuracy as evidence of induction only once it's clearly above this ceiling (computed by simulation):
+
+| Setting | Chance | No-induction ceiling (acc / loss) |
+|---|---|---|
+| `n_pairs 8`, every symbol once (default) | 0.125 | 0.325 / 1.556 |
+| `n_pairs 8`, `n_unique 4` | 0.125 | 0.523 / 0.972 |
+| `n_pairs 8`, `n_unique 4`, `n_labels 32` | 0.031 | 0.464 / 1.114 |
+
+With the default setting and a loss only at the query, the model stayed at the 0.325 ceiling for 20,000 steps. It learned label counting, not induction. `--n_unique 4 --dense_loss` lets symbols repeat and supervises every repeat, so each sequence gives about 5.6 induction targets instead of 1.
 
 ## Repository layout
 
@@ -45,6 +58,7 @@ src/train.py         training and evaluation for a single generation
 src/collapse.py      multi-generation collapse loop (base works; extended is a TODO)
 src/interpret.py     attention maps, induction scores, per-head ablation
 scripts/smoke_test.py  end-to-end check
+scripts/analyse.py   induction scores, ablations and attention heatmaps for a saved model
 results/             outputs (git-ignored)
 ```
 

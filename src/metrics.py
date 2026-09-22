@@ -17,6 +17,13 @@ def query_loss(logits: torch.Tensor, target_token: torch.Tensor) -> torch.Tensor
     return F.cross_entropy(logits[:, -1, :], target_token)
 
 
+def dense_loss(logits: torch.Tensor, dense_tgt: torch.Tensor) -> torch.Tensor:
+    """Cross-entropy over every supervised position (see data.dense_targets)."""
+    return F.cross_entropy(
+        logits.reshape(-1, logits.size(-1)), dense_tgt.reshape(-1), ignore_index=-100
+    )
+
+
 def query_accuracy(logits: torch.Tensor, target_token: torch.Tensor) -> torch.Tensor:
     """Fraction of queries answered with the correct label token."""
     preds = logits[:, -1, :].argmax(dim=-1)

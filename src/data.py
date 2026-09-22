@@ -31,6 +31,7 @@ def make_icl_batch(
     device: str = "cpu",
     generator: Optional[torch.Generator] = None,
     label_probs: Optional[torch.Tensor] = None,
+    n_unique: Optional[int] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Sample a batch of ICL symbol-task sequences.
 
@@ -44,6 +45,11 @@ def make_icl_batch(
             labels are drawn from this distribution instead of uniformly.
             This is the hook the model-collapse pipeline uses to inject a
             skewed (previous-generation) label distribution.
+        n_unique: optional number of *distinct* symbols per sequence. When
+            smaller than n_pairs, symbols repeat within the context (always
+            with the same label), so a single sequence contains several
+            induction opportunities. Combine with ``dense_targets`` for a much
+            stronger training signal. None = every symbol appears once.
 
     Returns:
         seq: LongTensor [batch_size, 2*n_pairs + 1] of token ids.
@@ -51,18 +57,25 @@ def make_icl_batch(
     """
     B, K = batch_size, n_pairs
 
+    def sample_labels(rows: int, cols: int) -> torch.Tensor:
+        if label_probs is None:
+            return torch.randint(0, n_labels, (rows, cols), generator=generator)
+        probs = label_probs.to(device="cpu", dtype=torch.float)
+        return torch.multinomial(
+            probs, rows * cols, replacement=True, generator=generator
+        ).view(rows, cols)
+
     # Distinct symbols per row: argsort of uniform noise gives a per-row permutation.
     noise = torch.rand(B, n_symbols, generator=generator)
-    symbols = noise.argsort(dim=1)[:, :K]  # [B, K] distinct symbol ids in [0, n_symbols)
-
-    # Labels for each exemplar (with replacement).
-    if label_probs is None:
-        labels = torch.randint(0, n_labels, (B, K), generator=generator)
+    if n_unique is None or n_unique >= K:
+        symbols = noise.argsort(dim=1)[:, :K]   # [B, K] each symbol appears once
+        labels = sample_labels(B, K)
     else:
-        label_probs = label_probs.to(dtype=torch.float)
-        labels = torch.multinomial(
-            label_probs, B * K, replacement=True, generator=generator
-        ).view(B, K)
+        uniq = noise.argsort(dim=1)[:, :n_unique]            # [B, U] distinct symbols
+        uniq_labels = sample_labels(B, n_unique)             # one fixed label per symbol
+        slot = torch.randint(0, n_unique, (B, K), generator=generator)
+        symbols = uniq.gather(1, slot)                        # [B, K] with repeats
+        labels = uniq_labels.gather(1, slot)                  # consistent pairing
 
     # Query: pick one exemplar position per row; the query symbol repeats it.
     q_idx = torch.randint(0, K, (B,), generator=generator)
@@ -80,6 +93,31 @@ def make_icl_batch(
     return seq.to(device), target_token.to(device)
 
 
+def dense_targets(seq: torch.Tensor, target_token: torch.Tensor, ignore_index: int = -100) -> torch.Tensor:
+    """Per-position targets that supervise *every* induction opportunity.
+
+    At each exemplar symbol position p the next token is that symbol's label.
+    It is only predictable if the same symbol already appeared earlier in the
+    sequence (then the model can copy the earlier label - induction). Those
+    positions get the label as target; all others are ignored. The final
+    (query) position always gets ``target_token``.
+
+    Returns a LongTensor [B, T] with ``ignore_index`` where there is no target.
+    """
+    B, T = seq.shape
+    tgt = torch.full((B, T), ignore_index, dtype=torch.long, device=seq.device)
+    sym_pos = torch.arange(0, T - 1, 2, device=seq.device)    # exemplar symbol positions
+    syms = seq[:, sym_pos]                                     # [B, K]
+    K = syms.shape[1]
+    same = syms.unsqueeze(2) == syms.unsqueeze(1)              # same[b, i, j]
+    earlier = torch.tril(torch.ones(K, K), diagonal=-1).bool().to(seq.device)  # j < i
+    seen_before = (same & earlier).any(dim=2)                  # [B, K]
+    next_labels = seq[:, sym_pos + 1]
+    tgt[:, sym_pos] = torch.where(seen_before, next_labels, torch.full_like(next_labels, ignore_index))
+    tgt[:, -1] = target_token
+    return tgt
+
+
 def make_fixed_set(
     n_batches: int,
     batch_size: int,
@@ -89,6 +127,7 @@ def make_fixed_set(
     seed: int,
     device: str = "cpu",
     label_probs: Optional[torch.Tensor] = None,
+    n_unique: Optional[int] = None,
 ):
     """Build a *frozen* list of batches with a fixed seed.
 
@@ -105,6 +144,7 @@ def make_fixed_set(
             make_icl_batch(
                 batch_size, n_pairs, n_symbols, n_labels,
                 device=device, generator=g, label_probs=label_probs,
+                n_unique=n_unique,
             )
         )
     return batches
