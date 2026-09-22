@@ -5,17 +5,19 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 from src.config import Config
-from src.train import train_model
+from src.train import train_model, save_checkpoint, load_checkpoint
 from src.interpret import induction_score, ablation_grid
 from src.collapse import run_collapse
 
 cfg = Config(steps=600, eval_every=200, eval_batches=5, batch_size=128,
-             n_generations=2, collapse_batches=5)
+             n_generations=2, collapse_batches=5, n_unique=4, dense_loss=True)
 cfg.device = "cuda" if torch.cuda.is_available() else "cpu"
 print(cfg.describe(), "| device", cfg.device)
 
 model, hist = train_model(cfg)
-print("final val acc:", round(hist[-1]["val_acc"], 3), "| chance:", round(1 / cfg.n_labels, 3))
+print("final val acc:", round(hist[-1]["val_acc"], 3), "| chance:", round(1 / cfg.n_labels, 3), "| no-induction ceiling (n_unique=4): 0.523")
+save_checkpoint(model, cfg, "results/smoke.pt", hist)
+model, cfg, _ = load_checkpoint("results/smoke.pt", device=cfg.device)
 print("induction score [layer x head]:\n", induction_score(model, cfg, n_batches=2))
 print("accuracy with each head ablated:\n", ablation_grid(model, cfg))
 

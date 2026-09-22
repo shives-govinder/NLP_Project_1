@@ -1,31 +1,45 @@
 """Training and evaluation for a single generation of the ICL model.
 
 ``train_model`` is imported by the model-collapse pipeline; the ``__main__``
-block lets you train and evaluate one model from the command line:
+block lets you train, evaluate and save one model from the command line:
 
-    python -m src.train --steps 3000 --attention_only
+    python -m src.train --steps 20000 --n_unique 4 --dense_loss --save results/base.pt
 
 Weights & Biases logging is optional and off by default (see --wandb).
 """
 from __future__ import annotations
 
 import argparse
+import dataclasses
+import os
 from typing import List, Optional, Tuple
 
 import torch
 
 from .config import Config
-from .data import make_fixed_set, make_icl_batch
-from .metrics import query_accuracy, query_loss, perplexity_from_loss
+from .data import dense_targets, make_fixed_set, make_icl_batch
+from .metrics import dense_loss, query_accuracy, query_loss, perplexity_from_loss
 
 # Fixed seeds give disjoint, reproducible validation / test splits.
 VAL_SEED = 10_001
 TEST_SEED = 20_002
 
 
+def fixed_split(cfg: Config, seed: int) -> List[Tuple[torch.Tensor, torch.Tensor]]:
+    """Frozen val/test batches drawn from the *true* (uniform-label) distribution."""
+    return make_fixed_set(
+        cfg.eval_batches, cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
+        seed=seed, device=cfg.device, n_unique=cfg.n_unique,
+    )
+
+
 @torch.no_grad()
 def evaluate(model, cfg: Config, batches: List[Tuple[torch.Tensor, torch.Tensor]]) -> dict:
-    """Average loss / accuracy / perplexity over a frozen set of batches."""
+    """Query-position loss / accuracy / perplexity over a frozen set of batches.
+
+    Metrics are always measured at the query, even when training with the
+    dense loss, so numbers stay comparable across settings.
+    """
     model.eval()
     tot_loss, tot_acc, n = 0.0, 0.0, 0
     for seq, tgt in batches:
@@ -55,28 +69,26 @@ def train_model(
     generation's distribution here. Validation/test always use the true
     (uniform) distribution so we measure degradation against reality.
     """
-    # Local import so the module imports even without torch installed elsewhere.
     from .model import Transformer
 
     torch.manual_seed(cfg.seed)
     device = cfg.device
     model = Transformer(cfg).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
-
-    val_set = make_fixed_set(
-        cfg.eval_batches, cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
-        seed=VAL_SEED, device=device,
-    )
+    val_set = fixed_split(cfg, VAL_SEED)
 
     history: List[dict] = []
     for step in range(cfg.steps + 1):
         model.train()
         seq, tgt = make_icl_batch(
             cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
-            device=device, label_probs=label_probs,
+            device=device, label_probs=label_probs, n_unique=cfg.n_unique,
         )
         logits = model(seq)
-        loss = query_loss(logits, tgt)
+        if cfg.dense_loss:
+            loss = dense_loss(logits, dense_targets(seq, tgt))
+        else:
+            loss = query_loss(logits, tgt)
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()
@@ -93,8 +105,29 @@ def train_model(
     return model, history
 
 
-def _auto_device(requested: str) -> str:
-    if requested != "cpu":
+def save_checkpoint(model, cfg: Config, path: str, history: Optional[List[dict]] = None) -> None:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    torch.save(
+        {"config": dataclasses.asdict(cfg), "state_dict": model.state_dict(), "history": history or []},
+        path,
+    )
+
+
+def load_checkpoint(path: str, device: str = "cpu"):
+    """Returns (model, cfg, history) from a file written by save_checkpoint."""
+    from .model import Transformer
+
+    ckpt = torch.load(path, map_location="cpu")
+    cfg = Config(**ckpt["config"])
+    cfg.device = device
+    model = Transformer(cfg).to(device)
+    model.load_state_dict(ckpt["state_dict"])
+    model.eval()
+    return model, cfg, ckpt.get("history", [])
+
+
+def auto_device(requested: Optional[str]) -> str:
+    if requested and requested != "cpu":
         return requested
     return "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -106,9 +139,14 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--batch_size", type=int, default=None)
     p.add_argument("--lr", type=float, default=None)
     p.add_argument("--n_layers", type=int, default=None)
+    p.add_argument("--n_pairs", type=int, default=None)
+    p.add_argument("--n_unique", type=int, default=None, help="distinct symbols per sequence")
+    p.add_argument("--n_labels", type=int, default=None)
+    p.add_argument("--dense_loss", action="store_true", help="supervise every induction opportunity")
     p.add_argument("--attention_only", action="store_true")
     p.add_argument("--seed", type=int, default=None)
-    p.add_argument("--device", type=str, default=None)
+    p.add_argument("--device", type=str, default=None, help="cpu, cuda or mps")
+    p.add_argument("--save", type=str, default=None, help="path to save the trained model, e.g. results/base.pt")
     p.add_argument("--wandb", action="store_true", help="log to Weights & Biases")
     return p
 
@@ -116,30 +154,32 @@ def build_argparser() -> argparse.ArgumentParser:
 def main():
     args = build_argparser().parse_args()
     cfg = Config.from_yaml(args.config) if args.config else Config()
-    for field in ("steps", "batch_size", "lr", "n_layers", "seed", "device"):
+    for field in ("steps", "batch_size", "lr", "n_layers", "n_pairs", "n_unique", "n_labels", "seed"):
         val = getattr(args, field)
         if val is not None:
             setattr(cfg, field, val)
+    if args.dense_loss:
+        cfg.dense_loss = True
     if args.attention_only:
         cfg.attention_only = True
-    cfg.device = _auto_device(cfg.device)
+    cfg.device = auto_device(args.device or cfg.device)
 
-    print(cfg.describe(), f"| device={cfg.device}")
+    print(cfg.describe(), f"| n_unique={cfg.n_unique} | dense_loss={cfg.dense_loss} | device={cfg.device}")
 
     wandb_run = None
     if args.wandb:
         import wandb
-        wandb_run = wandb.init(project="nlp-model-collapse", config=vars(cfg))
+        wandb_run = wandb.init(project="nlp-model-collapse", config=dataclasses.asdict(cfg))
 
-    model, _ = train_model(cfg, wandb_run=wandb_run)
+    model, history = train_model(cfg, wandb_run=wandb_run)
 
-    test_set = make_fixed_set(
-        cfg.eval_batches, cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
-        seed=TEST_SEED, device=cfg.device,
-    )
-    test = evaluate(model, cfg, test_set)
+    test = evaluate(model, cfg, fixed_split(cfg, TEST_SEED))
     print(f"FINAL TEST | acc {test['acc']:.3f} | loss {test['loss']:.4f} | ppl {test['ppl']:.2f}")
     print(f"model params: {model.num_params():,}")
+
+    if args.save:
+        save_checkpoint(model, cfg, args.save, history)
+        print(f"saved model to {args.save}")
 
 
 if __name__ == "__main__":

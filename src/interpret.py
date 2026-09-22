@@ -33,6 +33,11 @@ def induction_score(model, cfg: Config, n_batches: int = 10) -> torch.Tensor:
     symbol. An induction head should attend, from the query position, to that
     label position. We measure the average attention mass a head places there.
 
+    Reference points: uniform attention over the whole sequence gives about
+    1/T; spreading attention evenly over the label positions (the counting
+    shortcut) gives about 1/n_pairs per occurrence; a true induction head
+    approaches 1.
+
     Returns a tensor [n_layers, n_heads] of scores in [0, 1].
     """
     model.eval()
@@ -42,28 +47,30 @@ def induction_score(model, cfg: Config, n_batches: int = 10) -> torch.Tensor:
 
     for _ in range(n_batches):
         seq, _ = make_icl_batch(
-            cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels, device=cfg.device
+            cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
+            device=cfg.device, n_unique=cfg.n_unique,
         )
         patterns = attention_patterns(model, seq)
         B, T = seq.shape
         query_pos = T - 1
         query_syms = seq[:, query_pos]
 
-        # For each row find where the query symbol first appears among exemplar
-        # symbol positions (0, 2, 4, ...); the label is at that position + 1.
-        sym_positions = torch.arange(0, T - 1, 2, device=seq.device)  # exemplar symbol slots
+        # Exemplar symbols sit at positions 0, 2, 4, ...; each symbol's label is
+        # one position to its right. With repeats (n_unique < n_pairs) the query
+        # symbol can occur several times, so we sum attention over *all* of its
+        # label positions.
+        sym_positions = torch.arange(0, T - 1, 2, device=seq.device)
         for l in range(L):
             att = patterns[l]  # [B, H, T, T]
             if att is None:
                 continue
             for b in range(B):
-                # locate the matching exemplar symbol
-                match = (seq[b, sym_positions] == query_syms[b]).nonzero(as_tuple=True)[0]
-                if len(match) == 0:
+                match = seq[b, sym_positions] == query_syms[b]
+                label_pos = sym_positions[match] + 1
+                if len(label_pos) == 0:
                     continue
-                label_pos = int(sym_positions[match[0]].item()) + 1
-                scores[l] += att[b, :, query_pos, label_pos].cpu()
-            seen += B
+                scores[l] += att[b, :, query_pos, label_pos].sum(dim=-1).cpu()
+        seen += B  # once per batch (not per layer)
 
     return scores / max(seen, 1)
 
@@ -79,7 +86,8 @@ def ablate_head_accuracy(model, cfg: Config, layer: int, head: int, n_batches: i
     tot, n = 0.0, 0
     for _ in range(n_batches):
         seq, tgt = make_icl_batch(
-            cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels, device=cfg.device
+            cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
+            device=cfg.device, n_unique=cfg.n_unique,
         )
         logits = model(seq, head_masks=head_masks)
         tot += float(query_accuracy(logits, tgt).item())

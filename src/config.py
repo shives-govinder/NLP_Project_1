@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -17,6 +18,8 @@ class Config:
     n_symbols: int = 32       # size of the "symbol" universe (query tokens)
     n_labels: int = 8         # size of the "value/number" universe (targets)
     n_pairs: int = 8          # number of (symbol, label) exemplars per sequence
+    n_unique: Optional[int] = None  # distinct symbols per sequence (< n_pairs => repeats)
+    dense_loss: bool = False  # supervise every induction opportunity, not just the query
 
     # ---- model -------------------------------------------------------
     d_model: int = 64
