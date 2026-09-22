@@ -89,7 +89,7 @@ def plot_trends(rows, n_labels, path):
     c.legend(frameon=False, fontsize=8, labelcolor=INK_2, loc="lower left")
 
     line(d, gens, [r["test_acc"] for r in rows], BLUE, "intact model")
-    line(d, gens, [r["acc_without_prev_head"] for r in rows], ORANGE, "previous-token head removed")
+    line(d, gens, [r["acc_without_all_prev_heads"] for r in rows], ORANGE, "all previous-token heads removed")
     line(d, gens, [r["acc_without_last_layer"] for r in rows], AQUA, "whole last layer removed")
     d.set_ylim(0, 1.05)
     style_axis(d, "Ablation: accuracy with circuit parts removed", "accuracy")
@@ -157,14 +157,17 @@ def main():
         print(f"analysed {path}")
 
     print(f"\n{'gen':>3} {'seed':>4} {'phase@':>7} {'acc':>6} {'entropy':>8} "
-          f"{'prev(head)':>12} {'induct(head)':>13} {'acc-prev':>9} {'acc-lastL':>10}")
+          f"{'prev(head)':>12} {'induct(head)':>13} {'#prev':>6} {'#ind':>5} "
+          f"{'acc-prev':>9} {'acc-allprev':>12} {'acc-allind':>11} {'acc-lastL':>10}")
     for r in rows:
         ent = "-" if r["label_entropy"] is None else f"{r['label_entropy']:.4f}"
         phase = "-" if r["phase_change_step"] is None else str(r["phase_change_step"])
         print(f"{r['gen']:>3} {r['seed']:>4} {phase:>7} {r['test_acc']:>6.3f} {ent:>8} "
               f"{r['prev_head_score']:>7.3f}(H{r['prev_head']}) "
               f"{r['induction_head_score']:>8.3f}(H{r['induction_head']}) "
-              f"{r['acc_without_prev_head']:>9.3f} {r['acc_without_last_layer']:>10.3f}")
+              f"{len(r['prev_heads']):>6} {len(r['induction_heads']):>5} "
+              f"{r['acc_without_prev_head']:>9.3f} {r['acc_without_all_prev_heads']:>12.3f} "
+              f"{r['acc_without_all_induction_heads']:>11.3f} {r['acc_without_last_layer']:>10.3f}")
 
     out_json = os.path.join(run_dir, "circuit_summary.json")
     with open(out_json, "w") as f:

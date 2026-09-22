@@ -164,7 +164,7 @@ def masked_accuracy(model, cfg: Config, head_masks, batches) -> float:
 
 
 @torch.no_grad()
-def circuit_summary(model, cfg: Config, batches) -> dict:
+def circuit_summary(model, cfg: Config, batches, head_threshold: float = 0.8) -> dict:
     """Everything needed to compare the induction circuit across models.
 
     Head *indices* are arbitrary per training run (a different seed can put the
@@ -193,7 +193,13 @@ def circuit_summary(model, cfg: Config, batches) -> dict:
     prev_head = int(prev[0].argmax())
     ind_head = int(ind[last].argmax())
     base_acc = masked_accuracy(model, cfg, None, batches)
+    prev_heads = [h for h in range(H) if prev[0, h] > head_threshold] or [prev_head]
+    ind_heads = [h for h in range(H) if ind[last, h] > head_threshold] or [ind_head]
     return {
+        "prev_heads": prev_heads,
+        "induction_heads": ind_heads,
+        "acc_without_all_prev_heads": masked_accuracy(model, cfg, mask_for({0: prev_heads}), batches),
+        "acc_without_all_induction_heads": masked_accuracy(model, cfg, mask_for({last: ind_heads}), batches),
         "test_acc": base_acc,
         "induction_score": ind.tolist(),
         "prev_token_score": prev.tolist(),
