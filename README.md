@@ -29,7 +29,8 @@ All commands run from the repo root.
 | Same, attention-only | add `--attention_only` and save to `results/base_attn.pt` |
 | Original single-query setting (plateaus; keep as a documented negative result) | `python -m src.train --steps 20000 --lr 0.001 --device mps` |
 | Interpretability on a saved model | `python scripts/analyse.py results/base.pt` |
-| Model-collapse run, base variant | `python -m src.collapse --variant base --n_generations 5 --n_unique 4 --dense_loss --lr 0.001 --device mps` |
+| Model-collapse run, base variant (saves every generation) | `python -m src.collapse --variant base --n_generations 5 --steps 25000 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_base` |
+| Circuit across generations (table, JSON, 2 figures) | `python scripts/analyse_generations.py results/collapse_base mps` |
 | Log to Weights & Biases | add `--wandb` to `src.train` (install `wandb` first) |
 
 `--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU.
@@ -59,6 +60,7 @@ src/collapse.py      multi-generation collapse loop (base works; extended is a T
 src/interpret.py     attention maps, induction scores, per-head ablation
 scripts/smoke_test.py  end-to-end check
 scripts/analyse.py   induction scores, ablations and attention heatmaps for a saved model
+scripts/analyse_generations.py  circuit metrics and figures across collapse generations
 results/             outputs (git-ignored)
 ```
 
