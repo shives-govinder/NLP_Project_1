@@ -127,3 +127,82 @@ def plot_attention(seq_row: torch.Tensor, attn_row: torch.Tensor, n_symbols: int
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
+
+
+@torch.no_grad()
+def previous_token_score(model, cfg: Config, n_batches: int = 10) -> torch.Tensor:
+    """How much each head attends from every label position to the token right
+    before it (that label's own symbol). A previous-token head scores near 1.
+
+    Returns a tensor [n_layers, n_heads]. Only layer-0 scores are meaningful
+    for the induction circuit, but all layers are returned for completeness.
+    """
+    model.eval()
+    scores = torch.zeros(cfg.n_layers, cfg.n_heads)
+    for _ in range(n_batches):
+        seq, _ = make_icl_batch(
+            cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
+            device=cfg.device, n_unique=cfg.n_unique,
+        )
+        patterns = attention_patterns(model, seq)
+        T = seq.shape[1]
+        label_pos = torch.arange(1, T - 1, 2, device=seq.device)   # exemplar label slots
+        for l, att in enumerate(patterns):
+            # att[:, :, p, p-1] for every label position p -> [B, H, K]
+            scores[l] += att[:, :, label_pos, label_pos - 1].mean(dim=(0, 2)).cpu()
+    return scores / n_batches
+
+
+@torch.no_grad()
+def masked_accuracy(model, cfg: Config, head_masks, batches) -> float:
+    """Query accuracy on fixed batches with the given heads ablated (None = intact)."""
+    model.eval()
+    tot = 0.0
+    for seq, tgt in batches:
+        tot += float(query_accuracy(model(seq, head_masks=head_masks), tgt).item())
+    return tot / max(len(batches), 1)
+
+
+@torch.no_grad()
+def circuit_summary(model, cfg: Config, batches) -> dict:
+    """Everything needed to compare the induction circuit across models.
+
+    Head *indices* are arbitrary per training run (a different seed can put the
+    previous-token head in any slot), so comparisons across generations should
+    use the summary numbers (best score, accuracy when the key head or the whole
+    last layer is removed), not specific head ids.
+    """
+    L, H, dev = cfg.n_layers, cfg.n_heads, cfg.device
+    last = L - 1
+    ind = induction_score(model, cfg)
+    prev = previous_token_score(model, cfg)
+
+    def mask_for(layer_heads):
+        masks = {}
+        for layer, heads in layer_heads.items():
+            m = torch.ones(H, device=dev)
+            m[heads] = 0.0
+            masks[layer] = m
+        return masks
+
+    grid = torch.zeros(L, H)
+    for l in range(L):
+        for h in range(H):
+            grid[l, h] = masked_accuracy(model, cfg, mask_for({l: [h]}), batches)
+
+    prev_head = int(prev[0].argmax())
+    ind_head = int(ind[last].argmax())
+    base_acc = masked_accuracy(model, cfg, None, batches)
+    return {
+        "test_acc": base_acc,
+        "induction_score": ind.tolist(),
+        "prev_token_score": prev.tolist(),
+        "ablation_grid": grid.tolist(),
+        "prev_head": prev_head,
+        "prev_head_score": float(prev[0, prev_head]),
+        "induction_head": ind_head,
+        "induction_head_score": float(ind[last, ind_head]),
+        "acc_without_prev_head": float(grid[0, prev_head]),
+        "acc_without_last_layer": masked_accuracy(model, cfg, mask_for({last: list(range(H))}), batches),
+        "largest_single_head_drop": float(base_acc - grid.min()),
+    }

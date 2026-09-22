@@ -38,7 +38,7 @@ import torch
 from .config import Config
 from .data import make_icl_batch
 from .metrics import distribution_entropy
-from .train import auto_device, evaluate, fixed_split, train_model, TEST_SEED
+from .train import auto_device, evaluate, fixed_split, save_checkpoint, train_model, TEST_SEED
 
 
 @torch.no_grad()
@@ -88,8 +88,12 @@ def sample_extended_distribution(model, cfg: Config) -> torch.Tensor:
     )
 
 
-def run_collapse(cfg: Config, log=print) -> List[dict]:
+def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None) -> List[dict]:
     """Run the full multi-generation collapse experiment.
+
+    If ``save_dir`` is given, each generation's model is saved there as
+    ``gen{g}.pt`` so its circuit can be analysed afterwards
+    (scripts/analyse_generations.py).
 
     Returns a history list with one record per generation containing the
     validation metrics and the entropy of the distribution the *next*
@@ -107,6 +111,8 @@ def run_collapse(cfg: Config, log=print) -> List[dict]:
         log(f"\n=== generation {gen} (variant={cfg.variant}, seed={gen_cfg.seed}) ===")
         model, train_hist = train_model(gen_cfg, label_probs=label_probs, log=log)
         test = evaluate(model, gen_cfg, test_set)
+        if save_dir:
+            save_checkpoint(model, gen_cfg, os.path.join(save_dir, f"gen{gen}.pt"), train_hist)
 
         if cfg.variant == "base":
             next_probs = estimate_label_distribution(model, gen_cfg)
@@ -119,6 +125,7 @@ def run_collapse(cfg: Config, log=print) -> List[dict]:
         rec = {
             "gen": gen,
             "seed": gen_cfg.seed,
+            "train_label_probs": None if label_probs is None else label_probs.tolist(),
             "train_history": train_hist,
             "test_acc": test["acc"],
             "test_loss": test["loss"],
@@ -148,6 +155,8 @@ def main():
     p.add_argument("--seed", type=int, default=None, help="seed of generation 0 (gen g uses seed+g)")
     p.add_argument("--device", type=str, default=None, help="cpu, cuda or mps")
     p.add_argument("--out", type=str, default=None, help="save full results as JSON, e.g. results/collapse_base.json")
+    p.add_argument("--save_dir", type=str, default=None,
+                   help="save every generation's model (gen0.pt, gen1.pt, ...) and collapse.json here")
     args = p.parse_args()
 
     cfg = Config.from_yaml(args.config) if args.config else Config()
@@ -159,7 +168,9 @@ def main():
         cfg.dense_loss = True
     cfg.device = auto_device(args.device or cfg.device)
 
-    history = run_collapse(cfg)
+    history = run_collapse(cfg, save_dir=args.save_dir)
+    if args.save_dir and not args.out:
+        args.out = os.path.join(args.save_dir, "collapse.json")
 
     print("\ngen,seed,test_acc,next_label_entropy")
     for r in history:
