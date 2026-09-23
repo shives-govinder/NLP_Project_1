@@ -30,7 +30,8 @@ All commands run from the repo root.
 | Original single-query setting (plateaus; keep as a documented negative result) | `python -m src.train --steps 20000 --lr 0.001 --device mps` |
 | Interpretability on a saved model | `python scripts/analyse.py results/base.pt` |
 | Model-collapse run, base variant (saves every generation) | `python -m src.collapse --variant base --n_generations 5 --steps 25000 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_base` |
-| Circuit across generations (table, JSON, 2 figures) | `python scripts/analyse_generations.py results/collapse_base mps` |
+| Model-collapse run, extended variant | `python -m src.collapse --variant extended --n_generations 5 --steps 35000 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended` |
+| Circuit across generations (table, JSON, figures) | `python scripts/analyse_generations.py results/collapse_base mps` |
 | Log to Weights & Biases | add `--wandb` to `src.train` (install `wandb` first) |
 
 `--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU.
@@ -56,7 +57,7 @@ src/data.py          synthetic ICL data generator plus fixed val/test splits
 src/model.py         2-layer transformer from scratch, with attention capture and head ablation
 src/metrics.py       accuracy, loss, perplexity, output entropy (the collapse signal)
 src/train.py         training and evaluation for a single generation
-src/collapse.py      multi-generation collapse loop (base works; extended is a TODO)
+src/collapse.py      multi-generation collapse loop, base and extended variants
 src/interpret.py     attention maps, induction scores, per-head ablation
 scripts/smoke_test.py  end-to-end check
 scripts/analyse.py   induction scores, ablations and attention heatmaps for a saved model
@@ -71,7 +72,7 @@ results/             outputs (git-ignored)
 - [ ] **1. Reproduce the base task.** Get `smoke_test.py` passing, then do a full `src.train` run. Save the loss curve and look for the phase change.
 - [ ] **1b. Tune hyper-parameters.** The brief deducts marks if you don't tune at all. Sweep `lr`, `d_model` and `steps` on validation, and keep test for the end.
 - [ ] **2a. Base collapse.** Run `src.collapse --variant base` and plot test accuracy and `next_label_entropy` against generation. Expect little collapse, and use this as the control.
-- [ ] **2b. Extended collapse.** Implement `sample_extended_distribution` in `src/collapse.py`. The model also predicts the next symbol and its value, and those preferences feed back into the data. Designing this protocol is part of the graded science.
+- [ ] **2b. Extended collapse.** Built: the model also generates the next symbol and its value, and each generation trains only on the previous generation's output. See CONTEXT.md for the protocol. Still to do: run it at full length and analyse it.
 - [ ] **3. Metrics over training.** Track train and validation loss and accuracy, final test accuracy, perplexity and output entropy across generations.
 - [ ] **4. Interpretability.** Use `induction_score` and `ablation_grid` from `src/interpret.py` to find the previous-token and induction heads, then see how they degrade across generations. For more depth, see Conmy et al. (2023) and Chen et al. (2026).
 - [ ] **5. Extended abstract.** Two pages on the Moodle template, plus the NeurIPS ethics checklist and the Faculty AI ethics statement.

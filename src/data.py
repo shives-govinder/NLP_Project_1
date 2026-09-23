@@ -159,3 +159,58 @@ def decode_tokens(seq: torch.Tensor, n_symbols: int) -> str:
         else:
             parts.append(f"L{tok - n_symbols}")
     return " ".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Extended variant: context + query, then three more tokens
+#     s0 l0 ... s_{k-1} l_{k-1}  q  | l_q  s_next  l_next
+# The model must (1) give the query's label, (2) choose a next symbol, and
+# (3) give that symbol's label. In real data the next symbol is a uniformly
+# random context slot's symbol (so it always appears in the context and its
+# label can be copied by induction). Step (2) has no single correct answer,
+# which is what lets the model's own preferences feed back under recursion.
+# ---------------------------------------------------------------------------
+
+def make_extended_batch(
+    batch_size: int,
+    n_pairs: int,
+    n_symbols: int,
+    n_labels: int,
+    device: str = "cpu",
+    generator: Optional[torch.Generator] = None,
+    n_unique: Optional[int] = None,
+) -> torch.Tensor:
+    """Real extended sequences, LongTensor [batch_size, 2*n_pairs + 4]."""
+    seq, target = make_icl_batch(
+        batch_size, n_pairs, n_symbols, n_labels,
+        device="cpu", generator=generator, n_unique=n_unique,
+    )
+    B = seq.shape[0]
+    rows = torch.arange(B)
+    j = torch.randint(0, n_pairs, (B,), generator=generator)   # random context slot
+    next_sym = seq[rows, 2 * j]
+    next_lab = seq[rows, 2 * j + 1]
+    full = torch.cat([seq, target[:, None], next_sym[:, None], next_lab[:, None]], dim=1)
+    return full.to(device)
+
+
+def extended_targets(
+    seq: torch.Tensor, n_pairs: int, context_targets: bool = True, ignore_index: int = -100
+) -> torch.Tensor:
+    """Next-token targets for an extended sequence [B, 2*n_pairs + 4].
+
+    The query position predicts l_q, the l_q position predicts s_next, and the
+    s_next position predicts l_next (all read from the sequence itself, so under
+    recursion they are whatever the previous generation generated). With
+    ``context_targets`` the context also gets the dense induction targets.
+    """
+    B, T = seq.shape
+    q = 2 * n_pairs                                   # query position
+    tgt = torch.full((B, T), ignore_index, dtype=torch.long, device=seq.device)
+    if context_targets:
+        tgt[:, : q + 1] = dense_targets(seq[:, : q + 1], seq[:, q + 1], ignore_index)
+    else:
+        tgt[:, q] = seq[:, q + 1]
+    tgt[:, q + 1] = seq[:, q + 2]
+    tgt[:, q + 2] = seq[:, q + 3]
+    return tgt

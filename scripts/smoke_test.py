@@ -23,4 +23,12 @@ print("accuracy with each head ablated:\n", ablation_grid(model, cfg))
 
 cfg.steps = 300
 run_collapse(cfg)
+
+# extended variant: tiny dataset, short training - only checks the code path runs
+ext = Config(steps=300, eval_every=150, eval_batches=3, batch_size=128, n_generations=2,
+             n_unique=4, dense_loss=True, variant="extended", dataset_size=2000)
+ext.device = cfg.device
+history, real_ref = run_collapse(ext, save_dir="results/smoke_extended")
+assert real_ref["next_symbol_in_context"] == 1.0, "real next symbols must come from the context"
+assert history[-1]["extended_stats"]["next_symbol_in_context"] >= 0.0
 print("\nSMOKE TEST PASSED")

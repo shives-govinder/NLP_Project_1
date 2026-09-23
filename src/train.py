@@ -17,7 +17,7 @@ from typing import List, Optional, Tuple
 import torch
 
 from .config import Config
-from .data import dense_targets, make_fixed_set, make_icl_batch
+from .data import dense_targets, extended_targets, make_fixed_set, make_icl_batch
 from .metrics import dense_loss, query_accuracy, query_loss, perplexity_from_loss
 
 # Fixed seeds give disjoint, reproducible validation / test splits.
@@ -61,8 +61,14 @@ def train_model(
     label_probs: Optional[torch.Tensor] = None,
     log=print,
     wandb_run=None,
+    dataset: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.nn.Module, List[dict]]:
     """Train one model. Returns (model, history).
+
+    ``dataset`` (extended variant): a fixed LongTensor [N, 2*n_pairs + 4] of
+    extended sequences to sample training batches from, instead of generating
+    fresh data every step. Generation 0 gets real sequences; later generations
+    get sequences written by the previous generation's model.
 
     ``label_probs`` (a [n_labels] vector) skews the label distribution of the
     *training* data; the model-collapse pipeline passes the previous
@@ -77,18 +83,27 @@ def train_model(
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     val_set = fixed_split(cfg, VAL_SEED)
 
+    if dataset is not None:
+        dataset = dataset.to(device)
+
     history: List[dict] = []
     for step in range(cfg.steps + 1):
         model.train()
-        seq, tgt = make_icl_batch(
-            cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
-            device=device, label_probs=label_probs, n_unique=cfg.n_unique,
-        )
-        logits = model(seq)
-        if cfg.dense_loss:
-            loss = dense_loss(logits, dense_targets(seq, tgt))
+        if dataset is not None:
+            idx = torch.randint(0, dataset.shape[0], (cfg.batch_size,), device=device)
+            seq = dataset[idx]
+            logits = model(seq)
+            loss = dense_loss(logits, extended_targets(seq, cfg.n_pairs, context_targets=cfg.dense_loss))
         else:
-            loss = query_loss(logits, tgt)
+            seq, tgt = make_icl_batch(
+                cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
+                device=device, label_probs=label_probs, n_unique=cfg.n_unique,
+            )
+            logits = model(seq)
+            if cfg.dense_loss:
+                loss = dense_loss(logits, dense_targets(seq, tgt))
+            else:
+                loss = query_loss(logits, tgt)
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()

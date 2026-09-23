@@ -132,6 +132,47 @@ def plot_ablation_grids(rows, path):
     plt.close(fig)
 
 
+EXT_PANELS = [
+    ("Where the chosen next symbol comes from", "fraction of sequences",
+     [("next_symbol_in_context", BLUE, "appears in the context"),
+      ("next_symbol_is_query", ORANGE, "is the query symbol")], (0, 1.05)),
+    ("Entropy of chosen symbol ids", "entropy (nats)",
+     [("symbol_id_entropy", BLUE, None)], None),
+    ("Generated labels that match the context", "fraction correct",
+     [("query_label_correct", BLUE, "query label"),
+      ("next_label_correct", ORANGE, "next-symbol label")], (0, 1.05)),
+    ("Entropy of which context symbol is chosen", "entropy (nats)",
+     [("choice_rank_entropy", BLUE, None)], None),
+]
+
+
+def plot_extended(gens, stats, ref, path):
+    """What each generation wrote into the next generation's training data,
+    against the same statistics measured on real data (dashed lines)."""
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(2, 2, figsize=(9, 6.2), facecolor=SURFACE)
+    for ax, (title, ylabel, series, ylim) in zip(axes.flat, EXT_PANELS):
+        top = 0.0
+        for key, color, label in series:
+            ys = [stats[g][key] for g in gens]
+            line(ax, gens, ys, color, label)
+            top = max(top, max(ys))
+            if ref is not None:
+                ax.axhline(ref[key], color=color, linewidth=1, linestyle="--", alpha=0.8)
+                top = max(top, ref[key])
+        ax.set_ylim(*(ylim or (0, top * 1.15 if top > 0 else 1)))
+        style_axis(ax, title, ylabel)
+        ax.set_xlabel("generation (data it wrote for the next one)", color=INK_2, fontsize=9)
+        ax.set_xticks(gens)
+        if any(lbl for _, _, lbl in series):
+            ax.legend(frameon=False, fontsize=8, labelcolor=INK_2, loc="lower left")
+    fig.text(0.01, 0.005, "dashed lines = the same measure on real data", color=INK_2, fontsize=8)
+    fig.tight_layout(rect=(0, 0.02, 1, 1))
+    fig.savefig(path, dpi=200, facecolor=SURFACE)
+    plt.close(fig)
+
+
 def main():
     run_dir = sys.argv[1] if len(sys.argv) > 1 else "results/collapse_base"
     device = auto_device(sys.argv[2] if len(sys.argv) > 2 else None)
@@ -139,11 +180,14 @@ def main():
     if not paths:
         sys.exit(f"No gen*.pt files in {run_dir}. Run src.collapse with --save_dir {run_dir} first.")
 
-    entropy = {}
+    entropy, ext_stats, ext_ref = {}, {}, None
     cj = os.path.join(run_dir, "collapse.json")
     if os.path.exists(cj):
         with open(cj) as f:
-            entropy = {g["gen"]: g["next_label_entropy"] for g in json.load(f)["generations"]}
+            cjd = json.load(f)
+        entropy = {g["gen"]: g["next_label_entropy"] for g in cjd["generations"]}
+        ext_stats = {g["gen"]: g["extended_stats"] for g in cjd["generations"] if g.get("extended_stats")}
+        ext_ref = cjd.get("real_reference")
 
     rows, n_labels = [], None
     for path in paths:
@@ -168,6 +212,20 @@ def main():
               f"{len(r['prev_heads']):>6} {len(r['induction_heads']):>5} "
               f"{r['acc_without_prev_head']:>9.3f} {r['acc_without_all_prev_heads']:>12.3f} "
               f"{r['acc_without_all_induction_heads']:>11.3f} {r['acc_without_last_layer']:>10.3f}")
+
+    if ext_stats:
+        keys = ["query_label_correct", "next_symbol_in_context", "next_symbol_is_query",
+                "next_label_correct", "symbol_id_entropy", "choice_rank_entropy", "label_entropy"]
+        short = ["q-lab ok", "in ctx", "=query", "n-lab ok", "H(symid)", "H(choice)", "H(labels)"]
+        print("\nwhat each generation wrote for the next one (extended variant):")
+        print(f"{'':>6} " + " ".join(f"{h:>9}" for h in short))
+        if ext_ref:
+            print(f"{'real':>6} " + " ".join(f"{ext_ref[k]:>9.3f}" for k in keys))
+        for g in sorted(ext_stats):
+            print(f"{'gen ' + str(g):>6} " + " ".join(f"{ext_stats[g][k]:>9.3f}" for k in keys))
+        gens_ext = sorted(ext_stats)
+        plot_extended(gens_ext, ext_stats, ext_ref, os.path.join(run_dir, "extended_generated_data.png"))
+        print(f"saved extended_generated_data.png in {run_dir}")
 
     out_json = os.path.join(run_dir, "circuit_summary.json")
     with open(out_json, "w") as f:

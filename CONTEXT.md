@@ -2,7 +2,7 @@
 
 This file is the running record of where Project 1 stands: what has been built and found, the decisions behind it, and what's left to do. Read it before picking up work, and update it when something changes. The README covers setup and commands; this file covers everything else.
 
-*Last updated: 22 Sep 2026.*
+*Last updated: 22 Sep 2026 (extended variant added).*
 
 ## Deadlines and deliverables
 
@@ -90,19 +90,32 @@ What the table shows:
 
 ## Decisions still open
 
-1. **Extended variant design** (not built yet; `sample_extended_distribution` in `src/collapse.py` stops with an error until it is). The proposed defaults:
-   - After the query, the model generates the query's label, a **new symbol**, and that symbol's label, by **sampling at temperature 1**.
-   - The new symbol has no correct answer, so it exposes the model's own preferences. Any preference then compounds over generations.
-   - Each generation trains **only** on the previous generation's generated sequences (the pure recursive setting).
-   - Run **35,000 steps** per generation.
-   - **What to measure:** symbol and label entropy, test accuracy on real data, and the circuit (using `analyse_generations.py`).
-   - **Code needed:** `train_model` has to accept a fixed set of generated sequences instead of making fresh data each step.
+1. **Extended variant: built (not yet run at full length).** How it works:
+   - **Sequence:** the context and query are followed by three tokens: the query's label, a **next symbol**, and that symbol's label (20 tokens in total).
+   - **Real data:** the next symbol is a randomly chosen symbol from the context, and its label is the one it has in the context.
+   - **Generation 0** trains on a fixed set of 200,000 real sequences.
+   - **Every later generation** trains only on 200,000 sequences whose three extra tokens were **sampled at temperature 1 by the previous generation**. The context and query stay real.
+   - **Format rule:** each generated token is restricted to the right type (label, symbol, label), so every sequence stays well-formed.
+   - **Steps:** 35,000 per generation.
+   - **What we record for each generation's output (`extended_stats`, compared against the same statistics on real data):**
+     - whether the query label is correct;
+     - whether the next symbol appears in the context, and whether it's the query symbol;
+     - whether the next symbol's label is correct;
+     - the entropy of the chosen symbol IDs;
+     - the entropy of *which* context symbol is chosen;
+     - the entropy of the labels.
+   - `analyse_generations.py` also plots these in `extended_generated_data.png`.
+   - **Options:** `--temperature` (0 means always pick the most likely token) and `--dataset_size`.
+   - **Design decisions to justify in the method section:**
+     - the contexts stay real, so collapse can only enter through the model's own choices;
+     - there's a fixed, finite dataset per generation, because finite samples are where Shumailov-style drift comes from;
+     - generation 0 also uses a fixed dataset, so every generation has the same amount of data.
 2. **Fully recursive base variant** (optional, not built). Measure each generation on contexts drawn from the *previous* generation's label distribution, instead of fresh uniform contexts. A perfect copier would then pass sampling noise on from generation to generation, and the entropy should drift downward. That would test whether collapse can happen with no model errors at all.
 3. **Mean ablation** (optional): adds rigour to the circuit claims.
 
 ## Next steps, in order
 
-1. Decide the extended-variant design, then build it (the biggest remaining piece of work).
+1. Run the smoke test (it now also exercises the extended variant).
 2. Run the extended variant for 5 generations with `--save_dir results/collapse_extended`, then run `analyse_generations.py` on it.
 3. If there's time, add the fully recursive base variant and/or mean ablation.
 4. Hyper-parameter evidence: the 5-seed base run already shows the spread across seeds. Add a small sweep of learning rate or `d_model` on validation, because the brief deducts marks for no tuning.
