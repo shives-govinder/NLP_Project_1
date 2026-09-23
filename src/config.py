@@ -44,7 +44,8 @@ class Config:
     n_generations: int = 5
     variant: str = "base"     # "base" or "extended" (see src/collapse.py)
     collapse_batches: int = 40      # batches used to estimate each generation's output distribution
-    collapse_temperature: float = 1.0
+    collapse_temperature: float = 1.0   # sampling temperature for generated data (<= 0 means argmax)
+    dataset_size: int = 200_000         # sequences per generation in the extended variant
 
     # ---- derived -----------------------------------------------------
     @property
@@ -54,8 +55,12 @@ class Config:
 
     @property
     def max_seq_len(self) -> int:
-        """Interleaved sequence: s0 l0 s1 l1 ... s_{k-1} l_{k-1} query."""
-        return 2 * self.n_pairs + 1
+        """Interleaved sequence: s0 l0 s1 l1 ... s_{k-1} l_{k-1} query.
+
+        The extended variant appends three tokens (query label, next symbol,
+        next label), so its models need three more positions.
+        """
+        return 2 * self.n_pairs + 1 + (3 if self.variant == "extended" else 0)
 
     # ---- (de)serialisation ------------------------------------------
     @classmethod
