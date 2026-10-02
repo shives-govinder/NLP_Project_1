@@ -2,7 +2,7 @@
 
 This file is the running record of where Project 1 stands: what has been built and found, the decisions behind it, and what's left to do. Read it before picking up work, and update it when something changes. The README covers setup and commands; this file covers everything else.
 
-*Last updated: 22 Sep 2026 (extended variant added).*
+*Last updated: 2 Oct 2026 (15-generation extended run).*
 
 ## Deadlines and deliverables
 
@@ -75,6 +75,51 @@ What the table shows:
   - Removing only the *strongest* previous-token head understates the damage when there are two (seeds 1 and 3). That's why we report the "all heads removed" numbers.
 - **When the phase change happens depends heavily on the seed**, anywhere from 6,500 to 22,000 steps. The data distribution was the same in all five runs, so this is seed noise alone. It's the baseline spread the extended variant must be compared against.
 
+### 5. Extended variant, 5 generations × 35,000 steps (`results/collapse_extended/`)
+
+- Test accuracy on real data is 1.000 in every generation, and the generated query labels are always correct.
+- **Errors in the model's own choices build up.** The share of generated next symbols that don't appear in the context rises steadily: 0.8% → 1.8% → 2.7% → 3.6% → 4.4%, about 0.9 points per generation.
+- **The circuit is present in every generation** (previous-token score 0.94–0.97, induction score ≥ 0.99). But these models depend less on the identified heads than the base models do, **already in generation 0**:
+
+  | | Base runs (5 seeds) | Extended, gen 0 → 4 |
+  |---|---|---|
+  | Accuracy, all previous-token heads removed | 0.21–0.28 | 0.39, 0.42, 0.29, 0.41, 0.70 |
+  | Accuracy, all induction heads removed | 0.12–0.16 | 0.22, 0.20, 0.39, 0.40, 0.43 |
+
+  Because generation 0 trained only on real data, this difference comes from the extended setup (more training targets, and/or far more training after the circuit forms), **not** from collapse. The rise across generations is suggestive only: it's a single chain, and seed noise is large.
+- **The phase change arrives at 750–1,500 steps**, versus 6,500–22,000 in the base runs. The training loss levels off around 0.15 rather than 0, because choosing the next symbol is genuinely random. That floor is expected and is a useful sanity check.
+
+### 6. Extended variant, 15 generations × 8,000 steps (`results/collapse_extended_long/`), the main collapse result
+
+What each generation wrote for the next one (real data: in context 1.000, query share 0.343, symbol-ID entropy 3.466):
+
+| gen | next symbol not in context | query share among in-context choices | within-context choice entropy | symbol-ID entropy | next-label correct |
+|---|---|---|---|---|---|
+| 0 | 1.9% | 0.351 | 1.318 | 3.459 | 1.000 |
+| 2 | 6.1% | 0.362 | 1.308 | 3.442 | 0.998 |
+| 4 | 9.2% | 0.373 | 1.308 | 3.420 | 0.995 |
+| 6 | 13.4% | 0.380 | 1.305 | 3.406 | 0.993 |
+| 8 | 17.2% | 0.383 | 1.298 | 3.402 | 0.985 |
+| 10 | 20.1% | 0.394 | 1.283 | 3.395 | 0.994 |
+| 12 | 23.6% | 0.404 | 1.282 | 3.396 | 0.991 |
+| 14 | **26.4%** | **0.398** | 1.296 | **3.372** | 0.982 |
+
+Columns 3 and 4 are derived from the logged statistics. The query share is "next symbol is the query" divided by "next symbol in context". The within-context entropy removes the "not in context" bucket: H_in = (H(choice) − h(p_out)) / (1 − p_out), where p_out is the out-of-context share and h(p_out) its binary entropy. Test accuracy is 1.000 in every generation, query-label accuracy ≥ 0.999, and label entropy 2.0794 → 2.0781.
+
+Three collapse signatures, all from the part of the output the model *chooses* rather than copies:
+
+1. **Errors accumulate in a straight line.** The out-of-context share grows by **1.8 points per generation** (a linear fit leaves a largest error of 0.7 points, and the quadratic term is negligible). So each generation adds a roughly constant amount of new error on top of the error it inherits; the errors aren't compounding.
+   - The rate is **double** the 35,000-step run's 0.9 points per generation, and generation 0 already has 1.9% versus 0.8%. Less training per generation means a less accurate copy, which means faster drift. The training budget sets how fast collapse happens.
+2. **The most common choice gets more common.** Among choices that *are* in the context, the query symbol's share rises from 0.343 (real) to about 0.40, and the within-context entropy falls from 1.320 to about 1.28–1.30. This is the "favour the mode" behaviour the brief predicted. The query symbol is the one the model has just attended to, which makes it the easy default.
+   - Note: the raw "which context symbol" entropy rises and then levels off (1.39 → 1.53). That rise is caused by the growing out-of-context bucket and hides this narrowing; report the within-context version.
+3. **Symbol IDs drift away from uniform.** Symbol-ID entropy falls steadily from 3.466 to 3.372.
+
+**The copying parts are untouched.** Query labels, test accuracy on real data, and label entropy barely move. The induction circuit does its job in every generation. Collapse shows up only where the model has freedom to choose, which is the main point for the discussion section.
+
+Also: the training loss floor rises across generations (about 0.16 in gen 0 → about 0.30 in gen 14). That's expected, because the generated data becomes harder to predict as invented symbols build up.
+
+**Not yet done for this run:** the circuit analysis (`python scripts/analyse_generations.py results/collapse_extended_long mps`). That's the step that links these output trends to the induction heads.
+
 ## Bugs found and fixed (mention in the method where relevant)
 
 - `induction_score` used to halve every score. Numbers from before the fix (about 0.06) are wrong; the corrected value is about 0.12.
@@ -90,7 +135,7 @@ What the table shows:
 
 ## Decisions still open
 
-1. **Extended variant: built (not yet run at full length).** How it works:
+1. **Extended variant: built and run** (results in findings 5 and 6). How it works:
    - **Sequence:** the context and query are followed by three tokens: the query's label, a **next symbol**, and that symbol's label (20 tokens in total).
    - **Real data:** the next symbol is a randomly chosen symbol from the context, and its label is the one it has in the context.
    - **Generation 0** trains on a fixed set of 200,000 real sequences.
@@ -115,14 +160,14 @@ What the table shows:
 
 ## Next steps, in order
 
-1. Run the smoke test (it now also exercises the extended variant).
-2. Run the extended variant for 5 generations with `--save_dir results/collapse_extended`, then run `analyse_generations.py` on it.
-3. If there's time, add the fully recursive base variant and/or mean ablation.
-4. Hyper-parameter evidence: the 5-seed base run already shows the spread across seeds. Add a small sweep of learning rate or `d_model` on validation, because the brief deducts marks for no tuning.
-5. Final figures, then write the two-page abstract.
-6. Before submitting: `README.txt`, a check of `requirements.txt`, the NeurIPS checklist, and the Faculty AI ethics statement.
+1. **Circuit analysis on the long run:** `python scripts/analyse_generations.py results/collapse_extended_long mps`. Does reliance on the identified heads keep changing over 15 generations?
+2. **A second chain with a different seed**, to show the drift isn't a one-chain accident: `python -m src.collapse --variant extended --n_generations 10 --steps 8000 --seed 100 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended_s100`
+3. Optional: the same setup with `--steps 35000` for more generations, to confirm that training budget sets the drift rate (0.9 vs 1.8 points per generation).
+4. Hyper-parameter evidence: a small learning-rate or `d_model` sweep on validation (the brief deducts marks for no tuning). Mean ablation if there's time.
+5. Final figures, then write the two-page abstract. The background, method and base results can be written now.
+6. Before submitting: `README.txt`, a check of `requirements.txt`, the NeurIPS checklist, the Faculty AI ethics statement, and the contribution statement (about 13 Oct).
 
-**Suggested split:** one person builds the extended variant; one runs experiments and makes the figures (seeds, sweep, mean ablation); one drafts the background and method sections of the abstract now, since the base results are final. Project 2 hasn't started yet, so the work will need to be divided across both projects.
+**Suggested split:** one person on the remaining Project 1 runs and figures; one drafting the Project 1 abstract; one starting Project 2, which hasn't begun yet.
 
 ## Commands you'll use most
 
