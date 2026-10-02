@@ -2,7 +2,7 @@
 
 This file is the running record of where Project 1 stands: what has been built and found, the decisions behind it, and what's left to do. Read it before picking up work, and update it when something changes. The README covers setup and commands; this file covers everything else.
 
-*Last updated: 2 Oct 2026 (15-generation extended run).*
+*Last updated: 2 Oct 2026 (seed-100 replication chain).*
 
 ## Deadlines and deliverables
 
@@ -86,7 +86,7 @@ What the table shows:
   | Accuracy, all previous-token heads removed | 0.21–0.28 | 0.39, 0.42, 0.29, 0.41, 0.70 |
   | Accuracy, all induction heads removed | 0.12–0.16 | 0.22, 0.20, 0.39, 0.40, 0.43 |
 
-  Because generation 0 trained only on real data, this difference comes from the extended setup (more training targets, and/or far more training after the circuit forms), **not** from collapse. The rise across generations is suggestive only: it's a single chain, and seed noise is large.
+  Because generation 0 trained only on real data, this difference comes from the extended setup (more training targets, and/or far more training after the circuit forms), **not** from collapse. The rise across generations does not replicate in the 15-generation run (finding 6), so treat it as seed noise.
 - **The phase change arrives at 750–1,500 steps**, versus 6,500–22,000 in the base runs. The training loss levels off around 0.15 rather than 0, because choosing the next symbol is genuinely random. That floor is expected and is a useful sanity check.
 
 ### 6. Extended variant, 15 generations × 8,000 steps (`results/collapse_extended_long/`), the main collapse result
@@ -110,7 +110,7 @@ Three collapse signatures, all from the part of the output the model *chooses* r
 
 1. **Errors accumulate in a straight line.** The out-of-context share grows by **1.8 points per generation** (a linear fit leaves a largest error of 0.7 points, and the quadratic term is negligible). So each generation adds a roughly constant amount of new error on top of the error it inherits; the errors aren't compounding.
    - The rate is **double** the 35,000-step run's 0.9 points per generation, and generation 0 already has 1.9% versus 0.8%. Less training per generation means a less accurate copy, which means faster drift. The training budget sets how fast collapse happens.
-2. **The most common choice gets more common.** Among choices that *are* in the context, the query symbol's share rises from 0.343 (real) to about 0.40, and the within-context entropy falls from 1.320 to about 1.28–1.30. This is the "favour the mode" behaviour the brief predicted. The query symbol is the one the model has just attended to, which makes it the easy default.
+2. **The query symbol is increasingly favoured** (replicated in finding 7). The narrowing of the overall within-context distribution described below does *not* replicate. Among choices that *are* in the context, the query symbol's share rises from 0.343 (real) to about 0.40, and the within-context entropy falls from 1.320 to about 1.28–1.30. This is the "favour the mode" behaviour the brief predicted. The query symbol is the one the model has just attended to, which makes it the easy default.
    - Note: the raw "which context symbol" entropy rises and then levels off (1.39 → 1.53). That rise is caused by the growing out-of-context bucket and hides this narrowing; report the within-context version.
 3. **Symbol IDs drift away from uniform.** Symbol-ID entropy falls steadily from 3.466 to 3.372.
 
@@ -118,7 +118,42 @@ Three collapse signatures, all from the part of the output the model *chooses* r
 
 Also: the training loss floor rises across generations (about 0.16 in gen 0 → about 0.30 in gen 14). That's expected, because the generated data becomes harder to predict as invented symbols build up.
 
-**Not yet done for this run:** the circuit analysis (`python scripts/analyse_generations.py results/collapse_extended_long mps`). That's the step that links these output trends to the induction heads.
+**Circuit across the 15 generations** (`circuit_summary.json`, `circuit_across_generations.png`, `ablation_by_generation.png` in the run folder)
+
+| | gens 0–4 (mean) | gens 10–14 (mean) | trend over 15 gens |
+|---|---|---|---|
+| Previous-token head score | 0.954 | 0.986 | rises, r = +0.74 |
+| Accuracy, whole last layer removed | 0.231 | 0.168 | falls, r = −0.54 |
+| Accuracy, all induction heads removed | 0.337 | 0.187 | falls, r = −0.78 (outliers removed) |
+| Accuracy, all previous-token heads removed | 0.515 | 0.406 | falls, r = −0.69 (outliers removed) |
+
+Test accuracy is 1.000 and the induction score is ≥ 0.985 in every generation.
+
+- **The circuit doesn't weaken as the outputs collapse; if anything it becomes sharper and more essential.** The previous-token head attends more precisely, and removing the circuit hurts more in later generations. The model relies on the induction mechanism *more* as its generated data drifts further from real data. So collapse in this setting damages the model's choices, not its copying machinery.
+- **Outliers are artefacts of the 0.8 threshold.** In gens 4, 9 and 12 only one head of a type passed the threshold, so "removing all of them" left untouched heads that were really doing the same job: 0.907, 0.818 and 0.698. The whole-last-layer column doesn't depend on any threshold, and it shows the same downward trend. Report it as the robust measure, and mention the threshold issue as a limitation.
+- **This revises finding 5.** The rise in "all induction heads removed" across the 5-generation 35,000-step chain (0.22 → 0.43) does **not** replicate over 15 generations. Treat it as seed noise.
+- **Generation 0 here is still less dependent on the identified heads than the base models** (0.408 / 0.334, against base 0.21–0.28 / 0.12–0.16). Yet it had about 7,000 training steps after the phase change, inside the base runs' range of about 3,000–18,500. So "longer training after the phase change" doesn't explain the difference. The extended task itself (extra targets, the free symbol choice) leads to a more spread-out mechanism.
+- **Caveats:** this is one chain, and generation is confounded with seed. Each trend correlation is across only 15 models (r of about 0.5–0.8). The second chain (`results/collapse_extended_s100`) is what turns these trends into a claim.
+
+### 7. Replication: second extended chain, seed 100, 10 generations × 8,000 steps (`results/collapse_extended_s100/`)
+
+Same setup as finding 6 with an independent seed (the generation-0 model and all data sampling are different). Gens 0–9 of both chains:
+
+| | Seed-0 chain | Seed-100 chain | Replicates? |
+|---|---|---|---|
+| Next symbol not in context, gen 0 → 9 | 1.9% → 18.4% | 1.8% → 16.4% | **yes** |
+| Drift rate (linear fit) | 1.85 pts/gen (largest error 0.4) | 1.54 pts/gen (largest error 0.5) | **yes**; the chains never differ by more than 2.9 points |
+| Query share among in-context choices | 0.343 → 0.386 | 0.343 → 0.377 | **yes** |
+| Symbol-ID entropy | 3.466 → 3.386 | 3.466 → 3.376 | **yes** |
+| Next-label correct, gen 9 | 0.990 | 0.975 | yes (slowly falls) |
+| Within-context choice entropy | 1.320 → 1.289 (falls) | 1.321 → 1.343 (rises) | **no** |
+| Test accuracy on real data | 1.000 | 1.000 | yes |
+
+**Conclusions:**
+
+- **Robust:** straight-line error accumulation (about 1.5–1.9 points per generation); a growing preference for the query symbol among in-context choices; symbol IDs drifting from uniform; copying staying intact.
+- **Not robust:** the narrowing of the within-context choice distribution. Don't claim it. The query symbol gains share in both chains, but in seed 100 the other in-context choices become *more* even at the same time, so overall within-context entropy goes up. The robust claim is "the model increasingly favours the query symbol", not "its choices narrow".
+- **Still to do:** run the circuit analysis on this chain (`python scripts/analyse_generations.py results/collapse_extended_s100 mps`) to test the finding-6 claim that the circuit becomes *more* essential across generations.
 
 ## Bugs found and fixed (mention in the method where relevant)
 
@@ -160,8 +195,8 @@ Also: the training loss floor rises across generations (about 0.16 in gen 0 → 
 
 ## Next steps, in order
 
-1. **Circuit analysis on the long run:** `python scripts/analyse_generations.py results/collapse_extended_long mps`. Does reliance on the identified heads keep changing over 15 generations?
-2. **A second chain with a different seed**, to show the drift isn't a one-chain accident: `python -m src.collapse --variant extended --n_generations 10 --steps 8000 --seed 100 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended_s100`
+1. ~~Circuit analysis on the long run~~ (done, see finding 6).
+2. ~~A second chain with a different seed~~ (done, see finding 7). Still to do: run its circuit analysis. Original command: `python -m src.collapse --variant extended --n_generations 10 --steps 8000 --seed 100 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended_s100`
 3. Optional: the same setup with `--steps 35000` for more generations, to confirm that training budget sets the drift rate (0.9 vs 1.8 points per generation).
 4. Hyper-parameter evidence: a small learning-rate or `d_model` sweep on validation (the brief deducts marks for no tuning). Mean ablation if there's time.
 5. Final figures, then write the two-page abstract. The background, method and base results can be written now.
