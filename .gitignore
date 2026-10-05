@@ -11,3 +11,4 @@ results/*
 !results/.gitkeep
 # course brief kept local (remove this line to share it via the repo)
 *.pdf
+_NLP_2026__Extended_Abstract_Template/

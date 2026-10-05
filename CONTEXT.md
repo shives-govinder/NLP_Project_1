@@ -7,9 +7,40 @@ This file is the running record of where Project 1 stands: what has been built a
 ## Deadlines and deliverables
 
 - **Submission: 27 Oct 2026, 17:00.** Project 2 is due the same day.
-- **Preliminary contribution statement: about 13 Oct.** The brief says "two weeks before submission"; confirm the exact date on Moodle.
-- **What to submit:** the full code, `requirements.txt`, a **`README.txt`** (we have `README.md`, so run `cp README.md README.txt` before submitting), and a **two-page extended abstract as a PDF** using the Moodle template. The NeurIPS 2024 ethics checklist and the Faculty AI ethics statement go after the references. **Without the NeurIPS checklist the project isn't marked.**
+- **Preliminary contribution statement: about 13 Oct.** The brief says "two weeks before submission"; confirm the exact date on Moodle. Groups are locked after this.
 - **Marking:** only the write-up is graded, using this rubric: structure 10%, background 10%, **method 30%, results 30%, discussion 20%**. The brief says marks go to the quality of the science and interpretation, not model accuracy, and that honest limitations and well-explained failed experiments earn credit. The code only matters as the source of our results.
+
+### Submission checklist (updated 5 Oct)
+
+**Code**
+
+- [x] Full code implementation (this repo)
+- [ ] `requirements.txt`: final check (currently torch, numpy, pyyaml, matplotlib, tqdm)
+- [ ] **`README.txt`** (the brief asks for `.txt`): how to install and reproduce every result, with the final commands
+- [ ] Final test: fresh clone → install → `python scripts/smoke_test.py` passes
+
+**Extended abstract (PDF)**
+
+- [ ] Uploaded to Overleaf: `_NLP_2026__Extended_Abstract_Template.zip` → New Project → Upload Project (as instructed on Moodle). Write in `ccn_style.tex`, add references to `ccn_style.bib`, replace the placeholder `images/image.jpeg`.
+- [ ] Report figures (about 3), built from `results/`, uploaded to `images/`
+- [ ] Title, authors (all 3), abstract (about 20 lines) and 3 keywords
+- [ ] Introduction with background, methods, results, discussion: **strictly 2 pages** including figures and tables
+- [ ] Figure and table captions that tell the reader what to look at; every figure referenced in the text
+- [ ] References (outside the page limit)
+- [ ] Contribution statement (outside the page limit; may change from the preliminary one, but the authors can't)
+- [ ] Check the template's two blank `\phantom` pages after `\maketitle`: keep them or remove them as intended
+- [ ] Exported as PDF, page limit confirmed
+
+**Appended after the references, before any supplementary material**
+
+- [ ] **NeurIPS 2024 checklist: `.tex` NOT yet available on Moodle.** Without it the project isn't marked. Keep checking Moodle, and ask the lecturer or tutor if it hasn't appeared by about 13 Oct. Fallback (only if the lecturer allows): the public checklist from the official NeurIPS 2024 style files.
+- [ ] **Wits Science Faculty AI Ethics Form:** Shives has it and will add it manually.
+
+**Admin**
+
+- [ ] Preliminary contribution statement submitted (about 13 Oct)
+- [ ] All three group members agree on the final contribution statement
+- [ ] Submitted before **27 Oct, 17:00**: code + `requirements.txt` + `README.txt` + abstract PDF
 
 ## The research question
 
