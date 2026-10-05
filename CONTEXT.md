@@ -2,7 +2,7 @@
 
 This file is the running record of where Project 1 stands: what has been built and found, the decisions behind it, and what's left to do. Read it before picking up work, and update it when something changes. The README covers setup and commands; this file covers everything else.
 
-*Last updated: 2 Oct 2026 (seed-100 replication chain).*
+*Last updated: 5 Oct 2026 (hyper-parameter sweep; experiments complete).*
 
 ## Deadlines and deliverables
 
@@ -129,7 +129,7 @@ Also: the training loss floor rises across generations (about 0.16 in gen 0 → 
 
 Test accuracy is 1.000 and the induction score is ≥ 0.985 in every generation.
 
-- **The circuit doesn't weaken as the outputs collapse; if anything it becomes sharper and more essential.** The previous-token head attends more precisely, and removing the circuit hurts more in later generations. The model relies on the induction mechanism *more* as its generated data drifts further from real data. So collapse in this setting damages the model's choices, not its copying machinery.
+- **The circuit doesn't weaken as the outputs collapse.** (The "sharper and more essential" part below only weakly replicates; see finding 7.) In this chain it also became sharper and more essential: The previous-token head attends more precisely, and removing the circuit hurts more in later generations. The model relies on the induction mechanism *more* as its generated data drifts further from real data. So collapse in this setting damages the model's choices, not its copying machinery.
 - **Outliers are artefacts of the 0.8 threshold.** In gens 4, 9 and 12 only one head of a type passed the threshold, so "removing all of them" left untouched heads that were really doing the same job: 0.907, 0.818 and 0.698. The whole-last-layer column doesn't depend on any threshold, and it shows the same downward trend. Report it as the robust measure, and mention the threshold issue as a limitation.
 - **This revises finding 5.** The rise in "all induction heads removed" across the 5-generation 35,000-step chain (0.22 → 0.43) does **not** replicate over 15 generations. Treat it as seed noise.
 - **Generation 0 here is still less dependent on the identified heads than the base models** (0.408 / 0.334, against base 0.21–0.28 / 0.12–0.16). Yet it had about 7,000 training steps after the phase change, inside the base runs' range of about 3,000–18,500. So "longer training after the phase change" doesn't explain the difference. The extended task itself (extra targets, the free symbol choice) leads to a more spread-out mechanism.
@@ -153,7 +153,38 @@ Same setup as finding 6 with an independent seed (the generation-0 model and all
 
 - **Robust:** straight-line error accumulation (about 1.5–1.9 points per generation); a growing preference for the query symbol among in-context choices; symbol IDs drifting from uniform; copying staying intact.
 - **Not robust:** the narrowing of the within-context choice distribution. Don't claim it. The query symbol gains share in both chains, but in seed 100 the other in-context choices become *more* even at the same time, so overall within-context entropy goes up. The robust claim is "the model increasingly favours the query symbol", not "its choices narrow".
-- **Still to do:** run the circuit analysis on this chain (`python scripts/analyse_generations.py results/collapse_extended_s100 mps`) to test the finding-6 claim that the circuit becomes *more* essential across generations.
+- **Circuit across this chain** (`circuit_summary.json` in the run folder). The circuit is present and essential in every generation: previous-token score 0.94–0.99, induction score ≥ 0.985, test accuracy 1.000. The finding-6 claim that the circuit becomes *more* essential only partly replicates:
+
+  | Measure | Seed-0 chain | Seed-100 chain | Replicates? |
+  |---|---|---|---|
+  | Accuracy, whole last layer removed (threshold-free) | 0.231 → 0.168 over 15 gens (r = −0.54); flat over gens 0–9 | 0.237 → 0.180 over 10 gens (r = −0.75) | weakly: a small decline (about 0.06) in both, but on different timescales |
+  | Accuracy, all induction heads removed | falls (r = −0.78, outliers removed) | 0.17–0.22 and flat wherever all 4 heads are counted; gens 0 and 2–4 inflated because only 2 heads passed the threshold | no clear evidence beyond threshold artefacts |
+  | Accuracy, all previous-token heads removed | falls (r = −0.69, outliers removed) | no trend (r = −0.08) | **no** |
+  | Previous-token head score | rises (r = +0.74) | weak rise (r = +0.33) | weak |
+
+- **Claim for the report:** across both chains, the induction circuit is **preserved, and stays essential**, while the model's free choices collapse. There is at most weak evidence that reliance on the circuit *increases*. Don't claim "the circuit gets stronger"; present the last-layer decline as a small, consistent trend worth noting. The threshold-based "all heads removed" numbers are unreliable when few heads pass the 0.8 threshold; list this as a limitation.
+
+### 8. Hyper-parameter sweep (`scripts/sweep.py`, `results/sweep/sweep.json`)
+
+Extended variant, generation 0 only (real data), 8,000 steps, seed 0, the same training data for every configuration. Every number is measured on **validation data** (the test set is untouched). "Not in context" is the share of a fresh 20,000-sequence sample, written by the trained model, whose next symbol isn't in the context: the starting error behind collapse drift.
+
+| lr | d_model | params | phase change | val acc | val loss | not in context |
+|---|---|---|---|---|---|---|
+| 3e-4 | 32 | 27k | 3,500 | 1.000 | 0.0018 | 19.76% |
+| 3e-4 | 64 | 103k | 1,250 | 1.000 | 0.0002 | 2.88% |
+| 3e-4 | 128 | 403k | 750 | 1.000 | **0.0001** | **1.22%** |
+| 1e-3 | 32 | 27k | 1,750 | 1.000 | 0.0003 | 5.22% |
+| **1e-3** | **64** | **103k** | **1,000** | **1.000** | **0.0002** | **2.24%** |
+| 1e-3 | 128 | 403k | 1,750 | 0.993 | 0.0208 | 2.00% |
+| 3e-3 | 32 | 27k | 2,000 | 0.999 | 0.0036 | 4.94% |
+| 3e-3 | 64 | 103k | 6,250 | 1.000 | 0.0004 | 3.13% |
+| 3e-3 | 128 | 403k | 4,500 | 0.980 | 0.0596 | 2.36% |
+
+- **Every configuration learns induction** (validation accuracy ≥ 0.98), so the circuit doesn't depend on fine-tuned settings.
+- **Our setting (lr 1e-3, d_model 64) is justified.** It ties for second-best validation loss and is the best of the 64-wide models on every measure. The only better configuration (3e-4, 128) has 4× the parameters and trains about 2× slower. We keep 1e-3/64 for all results; in the report, mention 3e-4/128 as the validation-best alternative.
+- **lr 3e-3 is too high:** the phase change comes later, and at width 128 training is unstable (validation accuracy 0.98, loss 0.06).
+- **Capacity sets the starting error.** The not-in-context share falls with width (32 → 64 → 128 gives roughly 5–20% → 2–3% → 1–2%). Together with the training-budget effect (35,000 steps gave 0.8% in gen 0 and 0.9 points per generation of drift; 8,000 steps gave 1.9% and 1.5–1.9 points), this suggests the **collapse rate is set by how accurately each generation fits the choice distribution**. Not tested directly; an optional 128-wide chain would test it.
+- **Caveats:** one seed per configuration, and the base runs showed the phase-change step varying about 3× between seeds. So don't read much into phase-change differences under 2×; validation loss and the not-in-context share are the more reliable comparisons.
 
 ## Bugs found and fixed (mention in the method where relevant)
 
@@ -196,9 +227,9 @@ Same setup as finding 6 with an independent seed (the generation-0 model and all
 ## Next steps, in order
 
 1. ~~Circuit analysis on the long run~~ (done, see finding 6).
-2. ~~A second chain with a different seed~~ (done, see finding 7). Still to do: run its circuit analysis. Original command: `python -m src.collapse --variant extended --n_generations 10 --steps 8000 --seed 100 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended_s100`
+2. ~~A second chain with a different seed, plus its circuit analysis~~ (done, see finding 7). Command used: `python -m src.collapse --variant extended --n_generations 10 --steps 8000 --seed 100 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended_s100`
 3. Optional: the same setup with `--steps 35000` for more generations, to confirm that training budget sets the drift rate (0.9 vs 1.8 points per generation).
-4. Hyper-parameter evidence: a small learning-rate or `d_model` sweep on validation (the brief deducts marks for no tuning). Mean ablation if there's time.
+4. ~~Hyper-parameter sweep~~ (done, see finding 8). Optional: a 128-wide chain (`--lr 0.0003`) to test whether capacity slows collapse; mean ablation if there's time.
 5. Final figures, then write the two-page abstract. The background, method and base results can be written now.
 6. Before submitting: `README.txt`, a check of `requirements.txt`, the NeurIPS checklist, the Faculty AI ethics statement, and the contribution statement (about 13 Oct).
 
