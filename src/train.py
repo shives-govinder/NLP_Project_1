@@ -65,10 +65,11 @@ def train_model(
 ) -> Tuple[torch.nn.Module, List[dict]]:
     """Train one model. Returns (model, history).
 
-    ``dataset`` (extended variant): a fixed LongTensor [N, 2*n_pairs + 4] of
-    extended sequences to sample training batches from, instead of generating
-    fresh data every step. Generation 0 gets real sequences; later generations
-    get sequences written by the previous generation's model.
+    ``dataset``: a fixed LongTensor of sequences to sample training batches
+    from, instead of generating fresh data every step: [N, 2*n_pairs + 4] for
+    the extended variant, [N, 2*n_pairs + 2] (context, query, query label) for
+    the base variant. Generation 0 gets real sequences; later generations get
+    sequences written by the previous generation's model.
 
     ``label_probs`` (a [n_labels] vector) skews the label distribution of the
     *training* data; the model-collapse pipeline passes the previous
@@ -92,8 +93,15 @@ def train_model(
         if dataset is not None:
             idx = torch.randint(0, dataset.shape[0], (cfg.batch_size,), device=device)
             seq = dataset[idx]
-            logits = model(seq)
-            loss = dense_loss(logits, extended_targets(seq, cfg.n_pairs, context_targets=cfg.dense_loss))
+            if cfg.variant == "extended":
+                logits = model(seq)
+                loss = dense_loss(logits, extended_targets(
+                    seq, cfg.n_pairs, context_targets=cfg.dense_loss, targets=cfg.ext_targets))
+            else:
+                # base: [context, query, query label]; the label is the target, not an input
+                ctx, lq = seq[:, :-1], seq[:, -1]
+                logits = model(ctx)
+                loss = dense_loss(logits, dense_targets(ctx, lq)) if cfg.dense_loss else query_loss(logits, lq)
         else:
             seq, tgt = make_icl_batch(
                 cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
@@ -145,6 +153,12 @@ def auto_device(requested: Optional[str]) -> str:
     if requested and requested != "cpu":
         return requested
     return "cuda" if torch.cuda.is_available() else "cpu"
+
+
+def set_threads(n: Optional[int]) -> None:
+    """Cap CPU threads; small models run faster with a few threads than with all cores."""
+    if n:
+        torch.set_num_threads(n)
 
 
 def build_argparser() -> argparse.ArgumentParser:

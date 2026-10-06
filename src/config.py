@@ -42,10 +42,12 @@ class Config:
 
     # ---- model collapse ----------------------------------------------
     n_generations: int = 5
-    variant: str = "base"     # "base" or "extended" (see src/collapse.py)
+    variant: str = "base"     # "base", "extended" or "base_reweight" (see src/collapse.py)
     collapse_batches: int = 40      # batches used to estimate each generation's output distribution
     collapse_temperature: float = 1.0   # sampling temperature for generated data (<= 0 means argmax)
-    dataset_size: int = 200_000         # sequences per generation in the extended variant
+    dataset_size: int = 200_000         # sequences per generation (base and extended)
+    real_frac: float = 0.0              # share of each later generation's data kept from the real data
+    ext_targets: str = "all"            # extended targets: "all", "query+symbol" or "query"
 
     # ---- derived -----------------------------------------------------
     @property
