@@ -7,21 +7,29 @@ distribution. Over generations, information in the tails of the distribution
 is progressively lost (Shumailov et al., 2024) and the output entropy should
 fall.
 
-Two variants (both required by the brief):
+Both variants required by the brief use the same recursive protocol: contexts
+and queries stay real, the previous generation *samples* the tokens after the
+query (temperature ``collapse_temperature``), and each generation trains from
+scratch on the previous generation's fixed dataset of ``dataset_size``
+sequences (optionally with a share ``real_frac`` of the original real data
+kept, as in Shumailov et al.). So the model's own mistakes become the next
+generation's training targets.
 
-* ``base``     - the model predicts only the query's label. Because the correct
-                 label is fully determined by the (uniform) context, a model
-                 that has learned in-context learning tends to keep the marginal
-                 label distribution ~uniform. Collapse is therefore expected to
-                 be weak here: treat it as a CONTROL.
+* ``base``          - the model writes only the query's label (1 token).
+* ``extended``      - the model writes the query label, a next symbol and
+                      that symbol's label (3 tokens). The next symbol has no
+                      single right answer, so the model's own preferences can
+                      feed back and skew the distribution.
+* ``base_reweight`` - the original, *non-recursive* protocol, kept only to
+                      reproduce earlier results: the previous model's label
+                      distribution (on fresh uniform contexts) re-weights how
+                      context labels are sampled, but the training targets are
+                      always the true labels, so model errors never propagate
+                      and collapse is impossible by construction.
 
-* ``extended`` - the model additionally predicts the next symbol and its value,
-                 so its *own* preferences over symbols/labels feed back into the
-                 data and can skew the distribution. Collapse is expected to be
-                 stronger. Protocol: contexts stay real; the previous
-                 generation samples the three continuation tokens (temperature
-                 ``collapse_temperature``); each generation trains only on the
-                 previous generation's fixed dataset of ``dataset_size`` sequences.
+Every generation is also scored on a fixed set of *real* sequences at each
+position it writes (``real_eval``): the analogue of Shumailov et al.'s
+perplexity on the original test data.
 
 The functions here are deliberately small and composable so you can swap in
 alternative collapse protocols (e.g. feeding whole generated sequences,
@@ -39,7 +47,7 @@ import torch
 from .config import Config
 from .data import make_extended_batch, make_icl_batch
 from .metrics import distribution_entropy
-from .train import auto_device, evaluate, fixed_split, save_checkpoint, train_model, TEST_SEED
+from .train import auto_device, evaluate, fixed_split, save_checkpoint, set_threads, train_model, TEST_SEED
 
 
 @torch.no_grad()
@@ -70,12 +78,14 @@ def estimate_label_distribution(model, cfg: Config) -> torch.Tensor:
 
 
 EXT_DATA_SEED = 30_003   # seeds for building / sampling extended datasets
+REAL_EVAL_SEED = 40_004  # fixed real sequences every generation is scored on
+REAL_EVAL_SIZE = 10_000
 
 
-def real_extended_dataset(cfg: Config, seed: int) -> torch.Tensor:
-    """Generation 0's training data: ``cfg.dataset_size`` real extended sequences (CPU)."""
+def real_extended_dataset(cfg: Config, seed: int, n: Optional[int] = None) -> torch.Tensor:
+    """``n`` (default ``cfg.dataset_size``) real extended sequences (CPU)."""
     g = torch.Generator().manual_seed(seed)
-    chunks, left = [], cfg.dataset_size
+    chunks, left = [], cfg.dataset_size if n is None else n
     while left > 0:
         n = min(4096, left)
         chunks.append(make_extended_batch(
@@ -85,16 +95,29 @@ def real_extended_dataset(cfg: Config, seed: int) -> torch.Tensor:
     return torch.cat(chunks)
 
 
+def n_written(cfg: Config) -> int:
+    """Tokens the model writes after the query: 3 (extended) or 1 (base)."""
+    return 3 if cfg.variant == "extended" else 1
+
+
+def real_dataset(cfg: Config, seed: int, n: Optional[int] = None) -> torch.Tensor:
+    """Real sequences in the variant's layout: context, query, then the
+    ``n_written`` tokens (generation 0's training data, or the eval set)."""
+    data = real_extended_dataset(cfg, seed, n)
+    return data[:, : 2 * cfg.n_pairs + 1 + n_written(cfg)]
+
+
 @torch.no_grad()
 def generate_extended_dataset(model, cfg: Config, seed: int) -> torch.Tensor:
     """The next generation's training data, written by ``model``.
 
     Contexts and queries are fresh real samples; the model then generates the
-    three continuation tokens itself (query label, next symbol, next label) by
-    sampling at ``cfg.collapse_temperature`` (<= 0 means argmax). Each token is
-    restricted to the right type (label / symbol / label) so every sequence
-    stays well-formed; which label or symbol is chosen is up to the model.
-    Returns a CPU LongTensor [cfg.dataset_size, 2*n_pairs + 4].
+    tokens after the query itself (extended: query label, next symbol, next
+    label; base: query label only) by sampling at ``cfg.collapse_temperature``
+    (<= 0 means argmax). Each token is restricted to the right type (label /
+    symbol / label) so every sequence stays well-formed; which label or symbol
+    is chosen is up to the model.
+    Returns a CPU LongTensor [cfg.dataset_size, 2*n_pairs + 1 + n_written].
     """
     model.eval()
     g = torch.Generator().manual_seed(seed)
@@ -107,7 +130,7 @@ def generate_extended_dataset(model, cfg: Config, seed: int) -> torch.Tensor:
             device="cpu", generator=g, n_unique=cfg.n_unique,
         )
         seq = ctx.to(cfg.device)
-        for want_label in (True, False, True):
+        for want_label in (True, False, True)[: n_written(cfg)]:
             logits = model(seq)[:, -1, :].float().cpu()
             logits = logits.masked_fill(~(is_label if want_label else ~is_label), float("-inf"))
             if cfg.collapse_temperature <= 0:
@@ -167,39 +190,138 @@ def extended_stats(data: torch.Tensor, cfg: Config) -> dict:
     }
 
 
+@torch.no_grad()
+def base_stats(data: torch.Tensor, cfg: Config) -> dict:
+    """Describe base-variant sequences [N, 2*n_pairs + 2] (real or generated)."""
+    data = data.cpu()
+    K, S, NL = cfg.n_pairs, cfg.n_symbols, cfg.n_labels
+    ctx_syms, ctx_labs = data[:, 0:2 * K:2], data[:, 1:2 * K:2]
+    q, lq = data[:, 2 * K], data[:, 2 * K + 1]
+    q_slot = (ctx_syms == q[:, None]).float().argmax(dim=1)
+    true_lq = ctx_labs[torch.arange(data.shape[0]), q_slot]
+    return {
+        "query_label_correct": float((lq == true_lq).float().mean()),
+        "label_entropy": distribution_entropy(torch.bincount((lq - S).clamp(0, NL - 1), minlength=NL)),
+    }
+
+
+def data_stats(data: torch.Tensor, cfg: Config) -> dict:
+    return extended_stats(data, cfg) if cfg.variant == "extended" else base_stats(data, cfg)
+
+
+def mix_real(data: torch.Tensor, real: torch.Tensor, frac: float, seed: int) -> torch.Tensor:
+    """Replace a random ``frac`` of ``data`` with rows of the original real data."""
+    g = torch.Generator().manual_seed(seed)
+    n = int(round(frac * data.shape[0]))
+    out = data.clone()
+    out[torch.randperm(data.shape[0], generator=g)[:n]] = real[torch.randperm(real.shape[0], generator=g)[:n]]
+    return out
+
+
+@torch.no_grad()
+def real_eval(model, cfg: Config, data: torch.Tensor, batch: int = 2048) -> dict:
+    """Score a model on fixed *real* sequences at every position it writes.
+
+    This is the analogue of Shumailov et al.'s perplexity on the original
+    data, measured exactly rather than through samples:
+
+    query_label_nll/acc/prob   loss, argmax accuracy and probability of the true query label
+    next_symbol_kl             KL(true || model) for the next-symbol choice. The true
+                               distribution is known exactly: each context symbol with
+                               probability (its number of slots) / n_pairs. The model's
+                               distribution is restricted to symbols, as when generating.
+    next_symbol_mass_out       model probability on symbols NOT in the context (true: 0)
+    next_symbol_query_prob     model probability on the query symbol ...
+    next_symbol_query_true     ... and the true probability, for comparison
+    next_label_nll/acc/prob    as for the query label, at the next symbol's label
+    """
+    model.eval()
+    K, S = cfg.n_pairs, cfg.n_symbols
+    q = 2 * K
+    sums, n = {}, 0
+
+    def add(key, value):
+        sums[key] = sums.get(key, 0.0) + float(value)
+
+    for i in range(0, data.shape[0], batch):
+        seq = data[i:i + batch].to(cfg.device)
+        B = seq.shape[0]
+        logits = (model(seq) if cfg.variant == "extended" else model(seq[:, : q + 1])).float()
+        lp = logits.log_softmax(-1)
+        lq = seq[:, q + 1]
+        lq_lp = lp[:, q].gather(1, lq[:, None]).squeeze(1)
+        add("query_label_nll", -lq_lp.sum())
+        add("query_label_prob", lq_lp.exp().sum())
+        add("query_label_acc", (logits[:, q].argmax(-1) == lq).sum())
+        if cfg.variant == "extended":
+            ctx_syms = seq[:, 0:q:2]
+            p_true = torch.zeros(B, S, device=seq.device).scatter_add_(
+                1, ctx_syms, torch.full(ctx_syms.shape, 1.0 / K, device=seq.device))
+            lps = logits[:, q + 1, :S].log_softmax(-1)
+            ps = lps.exp()
+            add("next_symbol_kl", (p_true * (p_true.clamp_min(1e-12).log() - lps)).sum())
+            add("next_symbol_mass_out", (ps * (p_true == 0)).sum())
+            query = seq[:, q][:, None]
+            add("next_symbol_query_prob", ps.gather(1, query).sum())
+            add("next_symbol_query_true", p_true.gather(1, query).sum())
+            ln = seq[:, q + 3]
+            ln_lp = lp[:, q + 2].gather(1, ln[:, None]).squeeze(1)
+            add("next_label_nll", -ln_lp.sum())
+            add("next_label_prob", ln_lp.exp().sum())
+            add("next_label_acc", (logits[:, q + 2].argmax(-1) == ln).sum())
+        n += B
+    return {k: v / n for k, v in sums.items()}
+
+
 def format_stats(st: dict) -> str:
+    if "next_symbol_in_context" not in st:
+        return f"q-label ok {st['query_label_correct']:.4f} | H(labels) {st['label_entropy']:.4f}"
     return (f"q-label ok {st['query_label_correct']:.3f} | next-sym in ctx {st['next_symbol_in_context']:.3f} "
             f"| =query {st['next_symbol_is_query']:.3f} | next-label ok {st['next_label_correct']:.3f} "
             f"| H(sym id) {st['symbol_id_entropy']:.3f} | H(choice) {st['choice_rank_entropy']:.3f} "
             f"| H(labels) {st['label_entropy']:.3f}")
 
 
+def format_real_eval(ev: dict) -> str:
+    s = f"real q-label nll {ev['query_label_nll']:.4f} acc {ev['query_label_acc']:.4f}"
+    if "next_symbol_kl" in ev:
+        s += (f" | next-sym KL {ev['next_symbol_kl']:.4f} out-of-ctx mass {ev['next_symbol_mass_out']:.4f} "
+              f"query p {ev['next_symbol_query_prob']:.3f} (true {ev['next_symbol_query_true']:.3f}) "
+              f"| next-label nll {ev['next_label_nll']:.4f} acc {ev['next_label_acc']:.4f}")
+    return s
+
+
 def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None):
     """Run the full multi-generation collapse experiment.
 
-    base      each generation trains on fresh data whose label distribution is
-              the previous generation's predicted label distribution.
-    extended  each generation trains on a fixed dataset of ``cfg.dataset_size``
-              sequences: real ones for generation 0, then sequences whose three
-              continuation tokens were generated by the previous generation.
+    base, extended  each generation trains on a fixed dataset of
+                    ``cfg.dataset_size`` sequences: real ones for generation 0,
+                    then sequences whose post-query tokens were sampled by the
+                    previous generation (with a share ``cfg.real_frac`` of the
+                    original real rows kept, if set).
+    base_reweight   the original non-recursive protocol (see module docstring).
 
     If ``save_dir`` is given, each generation's model is saved there as
-    ``gen{g}.pt`` (for scripts/analyse_generations.py).
+    ``gen{g}.pt`` (for scripts/analyse_generations.py), and the data each
+    generation trained on as ``data_gen{g}.pt`` (uint8 token ids).
 
-    Returns (history, real_reference): one record per generation, and for the
-    extended variant the statistics of real data to compare against (else None).
+    Returns (history, real_reference): one record per generation, and the
+    statistics of real data to compare against (None for base_reweight).
     """
+    if cfg.variant not in ("base", "extended", "base_reweight"):
+        raise ValueError(f"unknown variant {cfg.variant!r}")
+    recursive = cfg.variant != "base_reweight"
     history: List[dict] = []
-    label_probs: Optional[torch.Tensor] = None  # base: gen 0 = real/uniform data
+    label_probs: Optional[torch.Tensor] = None  # base_reweight: gen 0 = real/uniform data
     test_set = fixed_split(cfg, TEST_SEED)
 
-    dataset, real_ref = None, None
-    if cfg.variant == "extended":
-        dataset = real_extended_dataset(cfg, EXT_DATA_SEED + cfg.seed)
-        real_ref = extended_stats(dataset, cfg)
+    dataset, real, real_ref, eval_set = None, None, None, None
+    if recursive:
+        real = real_dataset(cfg, EXT_DATA_SEED + cfg.seed)
+        dataset = real
+        real_ref = data_stats(real, cfg)
+        eval_set = real_dataset(cfg, REAL_EVAL_SEED, REAL_EVAL_SIZE)
         log(f"real-data reference | {format_stats(real_ref)}")
-    elif cfg.variant != "base":
-        raise ValueError(f"unknown variant {cfg.variant!r}")
 
     for gen in range(cfg.n_generations):
         # Each generation gets its own seed (fresh init + fresh data order).
@@ -207,7 +329,10 @@ def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None):
         # confounds generation effects with seed effects.
         gen_cfg = dataclasses.replace(cfg, seed=cfg.seed + gen)
         log(f"\n=== generation {gen} (variant={cfg.variant}, seed={gen_cfg.seed}) ===")
-        if cfg.variant == "extended":
+        if save_dir and recursive:
+            os.makedirs(save_dir, exist_ok=True)
+            torch.save(dataset.to(torch.uint8), os.path.join(save_dir, f"data_gen{gen}.pt"))
+        if recursive:
             model, train_hist = train_model(gen_cfg, dataset=dataset, log=log)
         else:
             model, train_hist = train_model(gen_cfg, label_probs=label_probs, log=log)
@@ -224,7 +349,7 @@ def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None):
             "test_loss": test["loss"],
             "test_ppl": test["ppl"],
         }
-        if cfg.variant == "base":
+        if not recursive:
             next_probs = estimate_label_distribution(model, gen_cfg)
             rec["next_label_entropy"] = distribution_entropy(next_probs)
             rec["label_probs"] = next_probs.tolist()
@@ -232,22 +357,37 @@ def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None):
             log(f"gen {gen} | test acc {test['acc']:.3f} | next-dist entropy {rec['next_label_entropy']:.4f} "
                 f"(uniform = {torch.log(torch.tensor(float(cfg.n_labels))):.4f})")
         else:
+            rec["real_eval"] = real_eval(model, gen_cfg, eval_set)
             # This generation writes the data the next generation trains on.
             dataset = generate_extended_dataset(model, gen_cfg, EXT_DATA_SEED + 1000 * (gen + 1) + cfg.seed)
-            stats = extended_stats(dataset, gen_cfg)
-            rec["extended_stats"] = stats
+            stats = data_stats(dataset, gen_cfg)          # model-written rows only, before any mixing
+            rec["generated_stats"] = stats
+            if cfg.variant == "extended":
+                rec["extended_stats"] = stats
             rec["next_label_entropy"] = stats["label_entropy"]
-            log(f"gen {gen} | test acc {test['acc']:.3f} | generated: {format_stats(stats)}")
+            if cfg.real_frac > 0:
+                dataset = mix_real(dataset, real, cfg.real_frac, EXT_DATA_SEED + 500 + gen + cfg.seed)
+            log(f"gen {gen} | test acc {test['acc']:.3f} | {format_real_eval(rec['real_eval'])}")
+            log(f"gen {gen} | generated: {format_stats(stats)}")
         history.append(rec)
+        if save_dir:  # keep partial results if a long chain is interrupted
+            write_results(os.path.join(save_dir, "collapse.json"), cfg, history, real_ref)
 
     return history, real_ref
+
+
+def write_results(path: str, cfg: Config, history: List[dict], real_ref: Optional[dict]) -> None:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w") as f:
+        json.dump({"config": dataclasses.asdict(cfg), "generations": history,
+                   "real_reference": real_ref}, f, indent=2)
 
 
 def main():
     import argparse
     p = argparse.ArgumentParser(description="Run the model-collapse pipeline.")
     p.add_argument("--config", type=str, default=None)
-    p.add_argument("--variant", choices=["base", "extended"], default=None)
+    p.add_argument("--variant", choices=["base", "extended", "base_reweight"], default=None)
     p.add_argument("--n_generations", type=int, default=None)
     p.add_argument("--steps", type=int, default=None)
     p.add_argument("--n_unique", type=int, default=None)
@@ -256,15 +396,19 @@ def main():
     p.add_argument("--seed", type=int, default=None, help="seed of generation 0 (gen g uses seed+g)")
     p.add_argument("--temperature", type=float, default=None,
                    help="sampling temperature for generated data (extended; <= 0 = argmax)")
-    p.add_argument("--dataset_size", type=int, default=None, help="sequences per generation (extended)")
+    p.add_argument("--dataset_size", type=int, default=None, help="sequences per generation")
+    p.add_argument("--real_frac", type=float, default=None,
+                   help="share of each later generation's data kept from the original real data")
     p.add_argument("--device", type=str, default=None, help="cpu, cuda or mps")
+    p.add_argument("--threads", type=int, default=None, help="CPU threads (CPU runs only)")
     p.add_argument("--out", type=str, default=None, help="save full results as JSON, e.g. results/collapse_base.json")
     p.add_argument("--save_dir", type=str, default=None,
                    help="save every generation's model (gen0.pt, gen1.pt, ...) and collapse.json here")
     args = p.parse_args()
 
     cfg = Config.from_yaml(args.config) if args.config else Config()
-    for field in ("variant", "n_generations", "steps", "n_unique", "lr", "seed", "dataset_size"):
+    set_threads(args.threads)
+    for field in ("variant", "n_generations", "steps", "n_unique", "lr", "seed", "dataset_size", "real_frac"):
         val = getattr(args, field)
         if val is not None:
             setattr(cfg, field, val)
@@ -284,13 +428,13 @@ def main():
     if real_ref is not None:
         print(f"\nreal data | {format_stats(real_ref)}")
         for r in history:
-            print(f"gen {r['gen']}    | {format_stats(r['extended_stats'])}")
+            print(f"gen {r['gen']}    | {format_stats(r['generated_stats'])}")
+        print()
+        for r in history:
+            print(f"gen {r['gen']}    | {format_real_eval(r['real_eval'])}")
 
     if args.out:
-        os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
-        with open(args.out, "w") as f:
-            json.dump({"config": dataclasses.asdict(cfg), "generations": history,
-                       "real_reference": real_ref}, f, indent=2)
+        write_results(args.out, cfg, history, real_ref)
         print(f"saved results to {args.out}")
 
 

@@ -195,7 +195,8 @@ def make_extended_batch(
 
 
 def extended_targets(
-    seq: torch.Tensor, n_pairs: int, context_targets: bool = True, ignore_index: int = -100
+    seq: torch.Tensor, n_pairs: int, context_targets: bool = True, ignore_index: int = -100,
+    targets: str = "all",
 ) -> torch.Tensor:
     """Next-token targets for an extended sequence [B, 2*n_pairs + 4].
 
@@ -203,6 +204,8 @@ def extended_targets(
     s_next position predicts l_next (all read from the sequence itself, so under
     recursion they are whatever the previous generation generated). With
     ``context_targets`` the context also gets the dense induction targets.
+    ``targets`` drops continuation targets for ablations: "query+symbol" leaves
+    out l_next, "query" also leaves out s_next.
     """
     B, T = seq.shape
     q = 2 * n_pairs                                   # query position
@@ -211,6 +214,8 @@ def extended_targets(
         tgt[:, : q + 1] = dense_targets(seq[:, : q + 1], seq[:, q + 1], ignore_index)
     else:
         tgt[:, q] = seq[:, q + 1]
-    tgt[:, q + 1] = seq[:, q + 2]
-    tgt[:, q + 2] = seq[:, q + 3]
+    if targets in ("all", "query+symbol"):
+        tgt[:, q + 1] = seq[:, q + 2]
+    if targets == "all":
+        tgt[:, q + 2] = seq[:, q + 3]
     return tgt
