@@ -2,7 +2,7 @@
 
 This file is the running record of where Project 1 stands: what has been built and found, the decisions behind it, and what's left to do. Read it before picking up work, and update it when something changes. The README covers setup and commands; this file covers everything else.
 
-*Last updated: 5 Oct 2026 (hyper-parameter sweep; experiments complete).*
+*Last updated: 7 Oct 2026 (v2 experiments: recursive base variant, real-data evaluation, causal circuit tests, data interventions). The v2 findings below are the ones to write up; findings 1–8 are the earlier (v1) record.*
 
 ## Deadlines and deliverables
 
@@ -59,7 +59,84 @@ The brief asks how **model collapse** affects **in-context learning and inductio
   - `--dense_loss`: the model is graded on every repeated symbol's label, not just the final query. That gives about 5.6 copying targets per sequence instead of 1.
 - **Data splits:** training data is generated fresh at every step. Validation and test sets are fixed and generated with their own seeds (`VAL_SEED`, `TEST_SEED` in `src/train.py`). Explain this in the method section.
 
-## Findings so far (with the numbers)
+## v2 findings (7 Oct): what to write up
+
+All runs are on the `experiments/collapse-v2` branch: seed 0 unless stated, lr 1e-3, d_model 64, `--n_unique 4 --dense_loss`, 200,000 sequences per generation. Extended chains: 8 generations × 8,000 steps. Base chain: 6 generations × 25,000 steps. Trained on the Wits cluster (`stampede`, CPU); outputs in `results/v2/` (git-ignored; copy from the cluster or from Koven's laptop). Figures: `results/v2/figures/fig_collapse.png` and `fig_interventions.png`, made by `python scripts/paper_figures.py`.
+
+**Two changes to the method since v1:**
+
+- **The base variant is now recursive.** Each generation trains on real contexts plus query labels *sampled* (temperature 1) by the previous model, so its mistakes become training targets. The v1 protocol (now `--variant base_reweight`) only re-weighted how context labels were sampled and always trained on the true labels, so it could not collapse by construction: a perfect copier under it gives label entropy 2.0791 (95% range 2.0786–2.0793), exactly the v1 base chain's 2.0788–2.0793. **Do not present v1 finding 4 as a collapse result.**
+- **Every generation is scored on 10,000 held-out *real* sequences** (`real_eval` in `collapse.json`), the analogue of Shumailov et al.'s perplexity on the original data. For the free next-symbol choice the true distribution is known exactly (each context symbol with probability slots/8), so KL(true ‖ model) is computed exactly, without sampling. It splits into two parts (`src/patching.py: choice_profile`):
+  - **leakage** = −log(1 − probability on symbols *not* in the context);
+  - **misallocation** = KL to the model renormalised over the context's symbols (probability spread wrongly *among* them).
+
+### A. Base variant (recursive): no collapse
+
+Query-label errors in the generated data stay at about 1 in 20,000 and shrink (0.99995 → 0.99999 correct); real-data query loss falls (7e-5 → 6e-6 nats); label entropy stays at the maximum (2.0794). The phase change came at 4,000–7,750 steps in every generation. **Interpretation:** when the answer is a deterministic function of a real context, the rare sampled errors are unpredictable noise that the next model cannot learn, so induction corrects errors instead of copying them. This is now a genuine negative result, not a design artefact.
+
+### B. Extended variant, temperature 1: collapse lives only in the free choice
+
+| | seed 0 (`ext_t1`) | seed 100 (`ext_t1_s100`) | replicates? |
+|---|---|---|---|
+| Probability on out-of-context symbols, gen 0 → 7 | 2.2% → 14.8% | 1.8% → 15.0% | **yes** (≈1.8 points/gen, as in v1 finding 6) |
+| Total KL on real data | 0.099 → 0.558 | 0.099 → 0.550 | **yes** |
+| of which misallocation within the context | 0.076 → 0.398 | 0.080 → 0.387 | **yes**: most of the drift |
+| Query-symbol preference (model / true, within context) | 1.03 → 1.11 | 1.01 → 1.07 | **yes** |
+| Frequency slope (1 = copies slot frequencies exactly) | 1.01 → 1.27 | 0.98 → 1.04 | **no**: strong in seed 0 only |
+| Single-slot symbols' choice probability (true 0.125) | 0.118 → 0.085 | 0.126 → 0.118 | **no** |
+| Query-label accuracy on real data | ≥ 0.999 | ≥ 0.999 | yes |
+| Next-label loss on real data | 0.0016 → 0.0129 | 0.0002 → 0.0048 | yes: small rise, accuracy stays ≥ 0.998 |
+
+- **Most of the drift is misallocation among context symbols (≈70% of the KL), not leakage.** It rises in both seeds. The v1 "within-context entropy" was pooled over all sequences and could not see this per-sequence error; that is why it did not replicate (v1 finding 7).
+- **Rich-get-richer frequency sharpening is seed-dependent at T = 1.** Report it as present in one chain, robust only at T = 0.7 (C).
+- **Copying stays intact but not perfect:** query and next-label argmax accuracy on real data stays ≥ 0.998, while the loss on the next label rises ~10× (still < 0.02 nats).
+
+### C. Temperature decides which kind of collapse (`ext_t07`, one seed)
+
+At T = 0.7 the distribution *narrows* instead of spreading: out-of-context probability *falls* 2.2% → 0.5%, misallocation explodes 0.076 → 2.56 nats, the frequency slope reaches 1.92, single-slot symbols nearly vanish (0.118 → 0.017, true 0.125), and the query preference reaches 1.28. Training loss falls each generation (0.171 → 0.036) because the data gets more predictable. This is Shumailov et al.'s "tails disappear"; T = 1 instead shows error accumulation into impossible outputs.
+
+### D. Keeping 10% real data (`ext_real10`, one seed)
+
+Total KL at generation 7 is 0.296 vs 0.558 without real data. Misallocation levels off at ≈ 0.17 from generation 5, but leakage keeps rising (11.8% out-of-context probability at generation 7). So real data stops one failure but not the other.
+
+### E. Deletion test on generation 7's data (Chen et al. 2026 style; `scripts/formation.py`, 3 seeds each)
+
+14.5% of `ext_t1`'s generation-7 rows contradict their context (next symbol not in the context, or a wrong label). Fresh models trained on the data:
+
+| Training data | leakage | misallocation | frequency slope |
+|---|---|---|---|
+| real data | 0.018–0.023 | 0.071–0.076 | 0.98–1.01 |
+| generation-7 data | 0.164–0.172 | 0.40–0.42 | 1.28–1.31 |
+| **erroneous rows deleted** | **0.016–0.018** | 0.42–0.47 | 1.26–1.31 |
+| same number of random rows deleted | 0.167–0.174 | 0.40–0.43 | 1.25–1.31 |
+
+**A clean dissociation:** leakage is caused entirely by the detectably wrong rows (deleting them restores the real-data level; deleting random rows does nothing). Misallocation and sharpening survive the deletion untouched, because they live in rows that look correct. A correctness filter cannot fix that half of collapse.
+
+### F. Induction formation (3 seeds each; phase change = first eval with validation accuracy ≥ 0.9, resolution 250 steps)
+
+- Collapsed data does not change *when* induction forms: generation-7 data 1,000–1,250 steps vs real data 750–1,750.
+- **The next-symbol target is what makes induction form fast.** Query-label target only: 6,250–7,750 steps; adding the next-symbol target: 750–1,000; adding the next-label target as well: 750–1,750. No overlap. This explains why the extended variant always formed induction ~7× sooner than the base variant. (A Chen-style "catalyst", but from the training objective rather than data content.)
+
+### G. The circuit, with causal tests (Conmy et al. 2023 style; `scripts/mechanism.py`, all 38 models)
+
+Interventions use **resample ablation** (a head's output replaced by its output on another sequence) instead of zero ablation, and **path patching** (changing only what layer 1 reads as queries, keys or values).
+
+- **The circuit is essential in every generation of every chain:** resampling all of layer 1 gives 0.117–0.132 accuracy (chance 0.125); resampling all of layer 0 gives 0.28–0.41.
+- **It is K-composition, as in Singh et al., but relayed by the layer-0 MLP.** In the 33/38 models where one layer-0 head matters (resampled accuracy ≤ 0.88), the path into layer 1's *keys*, including the route through the layer-0 MLP, carries a median **99%** of that head's effect (range 93–107%). The direct key edge alone carries a median **10%**. Queries carry nothing; values at most 12%. Singh et al.'s figure shows an attention-only path; here the MLP sits in the middle.
+- **Zero ablation understates induction heads here.** The most important single layer-1 head: median accuracy 0.68 when resampled vs 0.98 when zeroed. The v1 claim "induction is spread across several heads" (finding 3) rests on zero ablation; under resample ablation several models have one head that alone drops accuracy to 0.12–0.14. Report both and say why they differ (zeroing removes a head's vote; resampling makes it vote for a wrong label).
+- **Collapse does not damage the circuit.** Resampling layer 1 gives chance in every generation of every chain. The only trend that appears in both T = 1 chains is a weak *fall* in accuracy when all of layer 0 is resampled (r = −0.55 and −0.66 with generation, 8 models each; not significant at that size), i.e. layer 0 becomes, if anything, slightly *more* essential. That matches v1's weak "more essential" trend (finding 7); report it as weak, not as a result.
+
+### H. Limitations to state in the write-up
+
+- One seed for T = 0.7 and for the 10%-real chain; two seeds for T = 1. Generation is confounded with seed (generation g uses seed + g).
+- 8 generations only; the base chain has 6.
+- Phase-change steps have 250-step resolution and three seeds per condition.
+- The deletion test was done once, on generation 7 of one chain; the "erroneous" filter is defined by consistency with the context.
+- Resample ablation uses one corruption (each sequence paired with its neighbour in the batch).
+- The task is an adaptation of Singh et al.'s (discrete symbols, 8 pairs, repeated symbols, dense loss), not a reproduction (they use image exemplars and 2 pairs).
+- No hyper-parameter tuning for the base variant (the v1 sweep tuned the extended variant only).
+
+## Earlier findings (v1 code; see the v2 section for what supersedes them)
 
 ### 1. The original setup never learns induction (a negative result worth reporting)
 
@@ -83,6 +160,8 @@ These tests use zero ablation, meaning the head's output is set to zero.
 - **Removing L0H0 and L0H3 together gives 0.254**, the same as removing L0H0 alone. L0H3's role is still unclear.
 
 ### 4. The base collapse variant does not collapse (the control)
+
+**Superseded (v2 finding A):** this protocol, now `--variant base_reweight`, cannot collapse by construction, because its training targets are always the true labels. The entropy column below is sampling noise. The circuit columns are still valid observations about the trained models.
 
 We ran 5 generations with seeds 0–4, 25,000 steps each (`results/collapse_base/`):
 
@@ -227,8 +306,9 @@ Extended variant, generation 0 only (real data), 8,000 steps, seed 0, the same t
 - **Head numbers aren't comparable across generations or seeds.** The previous-token head might be H0 in one run and H3 in the next. Compare the summary numbers (head counts, best scores, "all removed" accuracy), not specific head IDs.
 - **A generation that never reaches the phase change looks like collapse but isn't.** Check that every generation clearly passes the 0.523 counting ceiling before interpreting its circuit.
   - 25,000 steps was only just enough (seed 1 broke through at 22,000). Use about 35,000 for the extended variant.
-- **Zero ablation can exaggerate a head's importance.** Mean ablation (replacing a head's output with its average) is the more standard method (Conmy et al., 2023). It isn't implemented yet; mention it as a limitation or add it.
-- **`results/` is git-ignored.** The trained models, JSON files and figures exist only on the machine that produced them, which is currently Shives' Mac. Share figures separately, or re-run the scripts to reproduce them.
+- **Zero ablation and resample ablation can disagree** (v2 finding G). Resample ablation (`src/patching.py`) is the one Conmy et al. (2023) prefer; use it for circuit claims.
+- **`results/` is git-ignored.** v1 results are on Shives' Mac; v2 results (`results/v2/`) are on the Wits cluster (`~/nlp1/results/v2`) and Koven's laptop. Share figures separately, or re-run the scripts to reproduce them.
+- **Absolute next-symbol probabilities are diluted by leakage.** Compare choices within the context (`choice_profile`'s `query_bias`, `kl_in`), not raw `next_symbol_query_prob`.
 
 ## Decisions still open
 
@@ -252,17 +332,17 @@ Extended variant, generation 0 only (real data), 8,000 steps, seed 0, the same t
      - the contexts stay real, so collapse can only enter through the model's own choices;
      - there's a fixed, finite dataset per generation, because finite samples are where Shumailov-style drift comes from;
      - generation 0 also uses a fixed dataset, so every generation has the same amount of data.
-2. **Fully recursive base variant** (optional, not built). Measure each generation on contexts drawn from the *previous* generation's label distribution, instead of fresh uniform contexts. A perfect copier would then pass sampling noise on from generation to generation, and the entropy should drift downward. That would test whether collapse can happen with no model errors at all.
-3. **Mean ablation** (optional): adds rigour to the circuit claims.
+2. ~~Fully recursive base variant~~ (done in v2 as `--variant base`, finding A).
+3. ~~Mean ablation~~ (resample ablation done instead, v2 finding G).
 
 ## Next steps, in order
 
-1. ~~Circuit analysis on the long run~~ (done, see finding 6).
-2. ~~A second chain with a different seed, plus its circuit analysis~~ (done, see finding 7). Command used: `python -m src.collapse --variant extended --n_generations 10 --steps 8000 --seed 100 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended_s100`
-3. Optional: the same setup with `--steps 35000` for more generations, to confirm that training budget sets the drift rate (0.9 vs 1.8 points per generation).
-4. ~~Hyper-parameter sweep~~ (done, see finding 8). Optional: a 128-wide chain (`--lr 0.0003`) to test whether capacity slows collapse; mean ablation if there's time.
-5. Final figures, then write the two-page abstract. The background, method and base results can be written now.
-6. Before submitting: `README.txt`, a check of `requirements.txt`, the NeurIPS checklist, the Faculty AI ethics statement, and the contribution statement (about 13 Oct).
+1. ~~v2 experiments, figures~~ (done, see the v2 findings).
+2. Optional, if there's time, to strengthen the weakest claims: a second seed for the T = 0.7 and 10%-real chains (`--seed 100`), and the deletion test on another generation. Each chain takes a few hours on the cluster.
+3. Write the two-page abstract from the v2 findings. Suggested story: collapse leaves the induction circuit intact and only corrupts the model's free choices (B, G); temperature decides spread vs narrowing (C); a correctness filter fixes leakage but not misallocation (E); the next-symbol objective catalyses induction (F).
+4. Before submitting: `README.txt`, a check of `requirements.txt`, the NeurIPS checklist, the Faculty AI ethics statement, and the contribution statement (about 13 Oct).
+
+The earlier v1 next-steps (seed-100 chain, sweep, long run) are done; see findings 6–8.
 
 **Suggested split:** one person on the remaining Project 1 runs and figures; one drafting the Project 1 abstract; one starting Project 2, which hasn't begun yet.
 

@@ -29,16 +29,22 @@ All commands run from the repo root.
 | Same, attention-only | add `--attention_only` and save to `results/base_attn.pt` |
 | Original single-query setting (plateaus; keep as a documented negative result) | `python -m src.train --steps 20000 --lr 0.001 --device mps` |
 | Interpretability on a saved model | `python scripts/analyse.py results/base.pt` |
-| Model-collapse run, base variant (saves every generation) | `python -m src.collapse --variant base --n_generations 5 --steps 25000 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_base` |
-| Model-collapse run, extended variant | `python -m src.collapse --variant extended --n_generations 5 --steps 35000 --n_unique 4 --dense_loss --lr 0.001 --device mps --save_dir results/collapse_extended` |
-| Circuit across generations (table, JSON, figures) | `python scripts/analyse_generations.py results/collapse_base mps` |
+| Model-collapse run, base variant (recursive: each generation trains on query labels sampled by the previous one) | `python -m src.collapse --variant base --n_generations 6 --steps 25000 --n_unique 4 --dense_loss --lr 0.001 --save_dir results/v2/base` |
+| Model-collapse run, extended variant | `python -m src.collapse --variant extended --n_generations 8 --steps 8000 --n_unique 4 --dense_loss --lr 0.001 --save_dir results/v2/ext_t1` |
+| Variations of a collapse run | add `--temperature 0.7` (sampling temperature), `--real_frac 0.1` (keep 10% real data), `--seed 100` |
+| Original non-recursive base protocol (v1; cannot collapse, kept to reproduce old results) | `--variant base_reweight` |
+| All five v2 chains plus circuit tests on a SLURM cluster | `sbatch scripts/cluster/collapse_v2.sbatch` (set the partition first) |
+| Circuit across generations (table, JSON, figures) | `python scripts/analyse_generations.py results/v2/ext_t1` |
+| Causal circuit tests per generation (resample ablation, path patching) | `python scripts/mechanism.py results/v2/ext_t1` |
+| Data interventions on one generation's data (deletion, training targets) | `python scripts/formation.py --data results/v2/ext_t1/data_gen7.pt --delete errors --out results/v2/formation/gen7_del_errors.json` (see the script's docstring for all six runs) |
+| Figures for the abstract | `python scripts/paper_figures.py` |
 | Log to Weights & Biases | add `--wandb` to `src.train` (install `wandb` first) |
 
-`--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU.
+`--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU (CUDA is picked automatically when present). On a CPU, `--threads 4`–`8` is usually faster than using every core.
 
 ### Reading the numbers: the no-induction ceiling
 
-A model without an induction circuit can still beat chance by guessing labels that appear often in the context. Treat accuracy as evidence of induction only once it's clearly above this ceiling (computed by simulation):
+A model without an induction circuit can still beat chance by guessing labels that appear often in the context. Treat accuracy as evidence of induction only once it's clearly above this ceiling (computed by simulation; the accuracy is from always guessing the most frequent context label, the loss from predicting labels in proportion to their counts):
 
 | Setting | Chance | No-induction ceiling (acc / loss) |
 |---|---|---|
@@ -57,11 +63,17 @@ src/data.py          synthetic ICL data generator plus fixed val/test splits
 src/model.py         2-layer transformer from scratch, with attention capture and head ablation
 src/metrics.py       accuracy, loss, perplexity, output entropy (the collapse signal)
 src/train.py         training and evaluation for a single generation
-src/collapse.py      multi-generation collapse loop, base and extended variants
-src/interpret.py     attention maps, induction scores, per-head ablation
+src/collapse.py      multi-generation collapse loop (base, extended, base_reweight) and real-data evaluation
+src/interpret.py     attention maps, induction scores, per-head zero ablation
+src/patching.py      resample ablation, path patching, next-symbol choice profile
 scripts/smoke_test.py  end-to-end check
 scripts/analyse.py   induction scores, ablations and attention heatmaps for a saved model
 scripts/analyse_generations.py  circuit metrics and figures across collapse generations
+scripts/mechanism.py causal circuit tests for every generation of a run
+scripts/formation.py data interventions: deleting rows, dropping training targets
+scripts/sweep.py     hyper-parameter sweep (extended variant, validation only)
+scripts/collapse_figures.py, scripts/paper_figures.py  figures
+scripts/cluster/     SLURM job script
 results/             outputs (git-ignored)
 ```
 
@@ -71,8 +83,8 @@ results/             outputs (git-ignored)
 
 - [ ] **1. Reproduce the base task.** Get `smoke_test.py` passing, then do a full `src.train` run. Save the loss curve and look for the phase change.
 - [ ] **1b. Tune hyper-parameters.** The brief deducts marks if you don't tune at all. Sweep `lr`, `d_model` and `steps` on validation, and keep test for the end.
-- [ ] **2a. Base collapse.** Run `src.collapse --variant base` and plot test accuracy and `next_label_entropy` against generation. Expect little collapse, and use this as the control.
-- [ ] **2b. Extended collapse.** Built: the model also generates the next symbol and its value, and each generation trains only on the previous generation's output. See CONTEXT.md for the protocol. Still to do: run it at full length and analyse it.
+- [x] **2a. Base collapse.** Done (v2, recursive). No collapse: see CONTEXT.md, v2 finding A.
+- [x] **2b. Extended collapse.** Done (v2): T = 1 with two seeds, T = 0.7, 10% real data. See CONTEXT.md, v2 findings B–E.
 - [ ] **3. Metrics over training.** Track train and validation loss and accuracy, final test accuracy, perplexity and output entropy across generations.
 - [ ] **4. Interpretability.** Use `induction_score` and `ablation_grid` from `src/interpret.py` to find the previous-token and induction heads, then see how they degrade across generations. For more depth, see Conmy et al. (2023) and Chen et al. (2026).
 - [ ] **5. Extended abstract.** Two pages on the Moodle template, plus the NeurIPS ethics checklist and the Faculty AI ethics statement.
