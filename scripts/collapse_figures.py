@@ -43,7 +43,7 @@ def main():
     args = p.parse_args()
     runs = []
     for spec in args.runs:
-        label, run_dir = spec.split("=", 1)
+        label, run_dir = spec.rsplit("=", 1)
         cfg, gens = load(run_dir)
         runs.append((label, cfg, gens))
 

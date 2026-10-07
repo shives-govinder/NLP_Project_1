@@ -66,15 +66,17 @@ def run(
                 everything downstream sees the replacement.
     path_delta  {(layer, "q"|"k"|"v"): [B, T, C]} is added to the residual
                 stream only where ``layer`` reads its queries / keys / values.
-    cache       per layer: "z" head outputs, "att" patterns, "contrib" each
-                head's residual write [B, H, T, C].
+    cache       per layer: "resid_in" the residual stream entering the layer,
+                "z" head outputs, "att" patterns, "contrib" each head's
+                residual write [B, H, T, C].
     """
     z_patch, path_delta = z_patch or {}, path_delta or {}
     model.eval()
     T = idx.shape[1]
     x = model.tok_emb(idx) + model.pos_emb(torch.arange(T, device=idx.device))[None]
-    cache = {"z": [], "att": [], "contrib": []}
+    cache = {"resid_in": [], "z": [], "att": [], "contrib": []}
     for l, blk in enumerate(model.blocks):
+        cache["resid_in"].append(x)
         xs = {p: blk.ln1(x + path_delta[(l, p)]) if (l, p) in path_delta else None for p in "qkv"}
         base = blk.ln1(x)
         z, att = _attention(blk.attn, *(xs[p] if xs[p] is not None else base for p in "qkv"))
@@ -120,11 +122,15 @@ def query_circuit_tests(model, cfg: Config, batches) -> dict:
     resample[l][h], zero[l][h]   one head resampled / zeroed
     resample_layer[l]            every head of layer l resampled at once
     path[h][p]                   layer-0 head h resampled only where layer 1
-                                 reads its p in {"q","k","v"} (path patching)
+                                 reads its p in {"q","k","v"}: the direct
+                                 edge from the head (path patching)
+    path_total[h][p]             the same, but including the head's effect
+                                 mediated by the layer-0 MLP (everything the
+                                 head changes in the residual entering layer 1)
     """
     L, H = cfg.n_layers, cfg.n_heads
     acc = {"intact": 0.0, "resample": torch.zeros(L, H), "zero": torch.zeros(L, H),
-           "resample_layer": torch.zeros(L), "path": torch.zeros(H, 3)}
+           "resample_layer": torch.zeros(L), "path": torch.zeros(H, 3), "path_total": torch.zeros(H, 3)}
     lp = {k: (v.clone() if torch.is_tensor(v) else 0.0) for k, v in acc.items()}
 
     for seq, tgt in batches:
@@ -145,11 +151,14 @@ def query_circuit_tests(model, cfg: Config, batches) -> dict:
             lp["resample_layer"][l] += p
         if L > 1:
             for h in range(H):
-                delta = bad["contrib"][0][:, h] - clean["contrib"][0][:, h]
-                for j, path in enumerate("qkv"):
-                    a, p = _score(run(model, seq, path_delta={(1, path): delta})[0], pos, tgt)
-                    acc["path"][h, j] += a
-                    lp["path"][h, j] += p
+                direct = bad["contrib"][0][:, h] - clean["contrib"][0][:, h]
+                _, patched = run(model, seq, z_patch={(0, h): bad["z"][0][:, h]})
+                total = patched["resid_in"][1] - clean["resid_in"][1]
+                for kind, delta in (("path", direct), ("path_total", total)):
+                    for j, path in enumerate("qkv"):
+                        a, p = _score(run(model, seq, path_delta={(1, path): delta})[0], pos, tgt)
+                        acc[kind][h, j] += a
+                        lp[kind][h, j] += p
 
     n = max(len(batches), 1)
     out = {}
@@ -174,6 +183,58 @@ def choice_metrics(logits: torch.Tensor, seq: torch.Tensor, cfg: Config) -> dict
         "mass_out": float((ps * (p_true == 0)).sum(1).mean()),
         "query_prob": float(ps.gather(1, query).mean()),
         "query_true": float(p_true.gather(1, query).mean()),
+    }
+
+
+@torch.no_grad()
+def choice_profile(model, cfg: Config, data: torch.Tensor, batch: int = 2000) -> dict:
+    """How the model's next-symbol choice differs from the truth, on real
+    extended sequences, split into its two parts:
+
+    kl            KL(true || model), the model restricted to symbols
+    leak          -log(1 - mass on out-of-context symbols): the part of kl
+                  from choosing symbols that are not in the context
+    kl_in         kl - leak: KL to the model renormalised over the context's
+                  symbols, i.e. probability misallocated *among* them
+    query_bias    model / true probability of the query symbol, within the context
+    slope         least-squares slope of the renormalised model probability
+                  on the true probability (slot count / n_pairs) over all
+                  context symbols: 1 = frequencies copied exactly, > 1 = common
+                  symbols over-chosen and rare ones under-chosen (lost tails)
+    by_count      mean renormalised probability of a non-query context symbol
+                  by its slot count c (true value c / n_pairs)
+    """
+    model.eval()
+    K, S = cfg.n_pairs, cfg.n_symbols
+    q = 2 * K
+    true_all, model_all, cnt_all, isq_all = [], [], [], []
+    kl = mass_out = 0.0
+    for i in range(0, data.shape[0], batch):
+        seq = data[i:i + batch].to(cfg.device)
+        p = model(seq)[:, q + 1, :S].float().softmax(-1).cpu()
+        seq = seq.cpu()
+        ctx = seq[:, 0:q:2]
+        counts = torch.zeros(seq.shape[0], S).scatter_add_(1, ctx, torch.ones(ctx.shape))
+        p_true = counts / K
+        inside = counts > 0
+        kl += float((p_true * (p_true.clamp_min(1e-12).log() - p.clamp_min(1e-30).log())).sum())
+        mass_out += float((p * ~inside).sum())
+        p_in = p * inside / (p * inside).sum(1, keepdim=True)
+        is_q = torch.zeros_like(inside).scatter_(1, seq[:, q:q + 1], True)
+        true_all.append(p_true[inside])
+        model_all.append(p_in[inside])
+        cnt_all.append(counts[inside])
+        isq_all.append(is_q[inside])
+    n = data.shape[0]
+    t, m, c, isq = (torch.cat(x) for x in (true_all, model_all, cnt_all, isq_all))
+    kl, mass_out = kl / n, mass_out / n
+    leak = -math.log(max(1 - mass_out, 1e-12))
+    slope = float(((t - t.mean()) * (m - m.mean())).sum() / ((t - t.mean()) ** 2).sum())
+    return {
+        "kl": kl, "mass_out": mass_out, "leak": leak, "kl_in": kl - leak,
+        "query_bias": float(m[isq].mean() / t[isq].mean()),
+        "slope": slope,
+        "by_count": {int(k): float(m[(c == k) & ~isq].mean()) for k in range(1, K + 1) if ((c == k) & ~isq).any()},
     }
 
 

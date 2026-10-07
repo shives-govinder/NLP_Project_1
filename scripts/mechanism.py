@@ -6,7 +6,8 @@ For each gen*.pt it runs, on held-out real data:
 
   query circuit    resample vs zero ablation of every head, resampling a whole
                    layer, and path patching of each layer-0 head into layer 1's
-                   queries / keys / values (scored at the query label)
+                   queries / keys / values, directly and including the route
+                   through the layer-0 MLP (scored at the query label)
   choice mechanism (extended models) where each head attends from the position
                    that picks the next symbol, and how resampling each head
                    changes that choice (KL to the true choice, probability on
@@ -64,7 +65,9 @@ def main():
         print("  resample one head [layer x head]:", [[round(v, 3) for v in r] for r in res.tolist()])
         print("  zero one head     [layer x head]:", [[round(v, 3) for v in r] for r in zero.tolist()])
         print("  resample whole layer:", [round(v, 3) for v in acc["resample_layer"]])
-        print("  path patch L0 head -> L1 [head x (q,k,v)]:", [[round(v, 3) for v in r] for r in path_.tolist()])
+        print("  path patch L0 head -> L1, direct [head x (q,k,v)]:", [[round(v, 3) for v in r] for r in path_.tolist()])
+        print("  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]:",
+              [[round(v, 3) for v in r] for r in acc["path_total"]])
         if "choice" in rec:
             ch = rec["choice"]
             print(f"  choice intact: " + ", ".join(f"{k} {v:.4f}" for k, v in ch["intact"].items()))
