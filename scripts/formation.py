@@ -35,6 +35,7 @@ from src.collapse import (EXT_DATA_SEED, REAL_EVAL_SEED, REAL_EVAL_SIZE, extende
                           generate_extended_dataset, real_dataset, real_eval)
 from src.config import Config
 from src.interpret import induction_score, previous_token_score
+from src.patching import choice_profile
 from src.train import auto_device, set_threads, train_model
 
 
@@ -99,6 +100,7 @@ def main():
             "phase_step": phase_step(hist),
             "final_val_acc": hist[-1]["val_acc"],
             "real_eval": real_eval(model, cfg, eval_set),
+            "choice": choice_profile(model, cfg, eval_set),
             "generated_out_of_context": 1 - st["next_symbol_in_context"],
             "generated_stats": st,
             "induction_score": induction_score(model, cfg).tolist(),
@@ -109,7 +111,8 @@ def main():
         runs.append(rec)
         print(f"seed {seed} | phase@{rec['phase_step']} | val acc {rec['final_val_acc']:.3f} | "
               f"generated not-in-context {100 * rec['generated_out_of_context']:.2f}% | "
-              f"real next-symbol KL {rec['real_eval']['next_symbol_kl']:.4f} | {rec['minutes']:.1f} min")
+              f"real next-symbol KL {rec['choice']['kl']:.4f} (leak {rec['choice']['leak']:.4f}, "
+              f"in-context {rec['choice']['kl_in']:.4f}) | slope {rec['choice']['slope']:.3f} | {rec['minutes']:.1f} min")
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w") as f:
