@@ -1,0 +1,449 @@
+real-data reference | q-label ok 1.000 | next-sym in ctx 1.000 | =query 0.343 | next-label ok 1.000 | H(sym id) 3.466 | H(choice) 1.320 | H(labels) 2.079
+
+=== generation 0 (variant=extended, seed=0) ===
+step     0 | train loss 3.6998 | val acc 0.180 | val loss 3.4103 | val ppl 30.27
+step   250 | train loss 1.1682 | val acc 0.507 | val loss 1.0455 | val ppl 2.84
+step   500 | train loss 1.0688 | val acc 0.499 | val loss 1.0201 | val ppl 2.77
+step   750 | train loss 1.0250 | val acc 0.517 | val loss 1.0038 | val ppl 2.73
+step  1000 | train loss 0.2542 | val acc 0.999 | val loss 0.0069 | val ppl 1.01
+step  1250 | train loss 0.2195 | val acc 1.000 | val loss 0.0021 | val ppl 1.00
+step  1500 | train loss 0.2095 | val acc 1.000 | val loss 0.0035 | val ppl 1.00
+step  1750 | train loss 0.1943 | val acc 1.000 | val loss 0.0019 | val ppl 1.00
+step  2000 | train loss 0.1817 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  2250 | train loss 0.1802 | val acc 1.000 | val loss 0.0021 | val ppl 1.00
+step  2500 | train loss 0.1841 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  2750 | train loss 0.1821 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  3000 | train loss 0.1728 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  3250 | train loss 0.1730 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step  3500 | train loss 0.1718 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  3750 | train loss 0.1603 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step  4000 | train loss 0.1678 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  4250 | train loss 0.1712 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  4500 | train loss 0.1733 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  4750 | train loss 0.1648 | val acc 0.999 | val loss 0.0017 | val ppl 1.00
+step  5000 | train loss 0.1725 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  5250 | train loss 0.1665 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  5500 | train loss 0.1696 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  5750 | train loss 0.1716 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  6000 | train loss 0.1536 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  6250 | train loss 0.1644 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  6500 | train loss 0.1789 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  6750 | train loss 0.1560 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  7000 | train loss 0.1623 | val acc 0.999 | val loss 0.0037 | val ppl 1.00
+step  7250 | train loss 0.1762 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  7500 | train loss 0.1613 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  7750 | train loss 0.1681 | val acc 0.999 | val loss 0.0044 | val ppl 1.00
+step  8000 | train loss 0.1713 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+gen 0 | test acc 1.000 | real q-label nll 0.0019 acc 0.9996 | next-sym KL 0.0986 out-of-ctx mass 0.0224 query p 0.345 (true 0.341) | next-label nll 0.0016 acc 0.9995
+gen 0 | generated: q-label ok 0.999 | next-sym in ctx 0.978 | =query 0.347 | next-label ok 0.999 | H(sym id) 3.458 | H(choice) 1.393 | H(labels) 2.079
+
+=== generation 1 (variant=extended, seed=1) ===
+step     0 | train loss 3.7234 | val acc 0.128 | val loss 3.5431 | val ppl 34.57
+step   250 | train loss 1.1528 | val acc 0.505 | val loss 1.0392 | val ppl 2.83
+step   500 | train loss 1.1008 | val acc 0.510 | val loss 1.0161 | val ppl 2.76
+step   750 | train loss 1.0582 | val acc 0.535 | val loss 0.9838 | val ppl 2.67
+step  1000 | train loss 0.2810 | val acc 1.000 | val loss 0.0038 | val ppl 1.00
+step  1250 | train loss 0.2352 | val acc 1.000 | val loss 0.0028 | val ppl 1.00
+step  1500 | train loss 0.2167 | val acc 1.000 | val loss 0.0020 | val ppl 1.00
+step  1750 | train loss 0.2084 | val acc 1.000 | val loss 0.0015 | val ppl 1.00
+step  2000 | train loss 0.1876 | val acc 0.999 | val loss 0.0024 | val ppl 1.00
+step  2250 | train loss 0.1889 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  2500 | train loss 0.1937 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  2750 | train loss 0.2006 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  3000 | train loss 0.1980 | val acc 1.000 | val loss 0.0013 | val ppl 1.00
+step  3250 | train loss 0.1677 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  3500 | train loss 0.1846 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  3750 | train loss 0.1897 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  4000 | train loss 0.1804 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  4250 | train loss 0.1997 | val acc 1.000 | val loss 0.0016 | val ppl 1.00
+step  4500 | train loss 0.1878 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  4750 | train loss 0.1735 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  5000 | train loss 0.1745 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  5250 | train loss 0.1837 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  5500 | train loss 0.1811 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  5750 | train loss 0.1854 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  6000 | train loss 0.1721 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  6250 | train loss 0.1849 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  6500 | train loss 0.1824 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  6750 | train loss 0.1874 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  7000 | train loss 0.1871 | val acc 0.999 | val loss 0.0019 | val ppl 1.00
+step  7250 | train loss 0.1863 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  7500 | train loss 0.1788 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  7750 | train loss 0.1718 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  8000 | train loss 0.1747 | val acc 1.000 | val loss 0.0018 | val ppl 1.00
+gen 1 | test acc 1.000 | real q-label nll 0.0017 acc 0.9998 | next-sym KL 0.1532 out-of-ctx mass 0.0415 query p 0.344 (true 0.341) | next-label nll 0.0041 acc 0.9993
+gen 1 | generated: q-label ok 0.999 | next-sym in ctx 0.959 | =query 0.346 | next-label ok 0.997 | H(sym id) 3.455 | H(choice) 1.432 | H(labels) 2.079
+
+=== generation 2 (variant=extended, seed=2) ===
+step     0 | train loss 3.7243 | val acc 0.115 | val loss 3.4529 | val ppl 31.59
+step   250 | train loss 1.1673 | val acc 0.512 | val loss 1.0333 | val ppl 2.81
+step   500 | train loss 1.1388 | val acc 0.513 | val loss 1.0160 | val ppl 2.76
+step   750 | train loss 1.0915 | val acc 0.518 | val loss 1.0081 | val ppl 2.74
+step  1000 | train loss 1.0058 | val acc 0.509 | val loss 1.0076 | val ppl 2.74
+step  1250 | train loss 0.9874 | val acc 0.505 | val loss 1.0123 | val ppl 2.75
+step  1500 | train loss 0.9341 | val acc 0.563 | val loss 0.9412 | val ppl 2.56
+step  1750 | train loss 0.2561 | val acc 0.999 | val loss 0.0069 | val ppl 1.01
+step  2000 | train loss 0.2372 | val acc 1.000 | val loss 0.0022 | val ppl 1.00
+step  2250 | train loss 0.2264 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  2500 | train loss 0.2436 | val acc 1.000 | val loss 0.0016 | val ppl 1.00
+step  2750 | train loss 0.2212 | val acc 1.000 | val loss 0.0019 | val ppl 1.00
+step  3000 | train loss 0.2090 | val acc 1.000 | val loss 0.0016 | val ppl 1.00
+step  3250 | train loss 0.2186 | val acc 0.999 | val loss 0.0027 | val ppl 1.00
+step  3500 | train loss 0.2108 | val acc 0.997 | val loss 0.0090 | val ppl 1.01
+step  3750 | train loss 0.2008 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  4000 | train loss 0.2007 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  4250 | train loss 0.2019 | val acc 1.000 | val loss 0.0013 | val ppl 1.00
+step  4500 | train loss 0.1800 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  4750 | train loss 0.2024 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  5000 | train loss 0.2114 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  5250 | train loss 0.1951 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  5500 | train loss 0.2444 | val acc 0.999 | val loss 0.0067 | val ppl 1.01
+step  5750 | train loss 0.1846 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  6000 | train loss 0.1814 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  6250 | train loss 0.1869 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  6500 | train loss 0.2119 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  6750 | train loss 0.2012 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  7000 | train loss 0.2066 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  7250 | train loss 0.1962 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  7500 | train loss 0.2047 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  7750 | train loss 0.1764 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  8000 | train loss 0.1884 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+gen 2 | test acc 1.000 | real q-label nll 0.0014 acc 0.9997 | next-sym KL 0.2184 out-of-ctx mass 0.0620 query p 0.341 (true 0.341) | next-label nll 0.0055 acc 0.9998
+gen 2 | generated: q-label ok 0.999 | next-sym in ctx 0.938 | =query 0.346 | next-label ok 0.996 | H(sym id) 3.446 | H(choice) 1.460 | H(labels) 2.079
+
+=== generation 3 (variant=extended, seed=3) ===
+step     0 | train loss 3.7398 | val acc 0.142 | val loss 3.4792 | val ppl 32.43
+step   250 | train loss 1.2312 | val acc 0.510 | val loss 1.0368 | val ppl 2.82
+step   500 | train loss 1.1345 | val acc 0.518 | val loss 1.0101 | val ppl 2.75
+step   750 | train loss 0.3778 | val acc 0.960 | val loss 0.1175 | val ppl 1.12
+step  1000 | train loss 0.2963 | val acc 0.997 | val loss 0.0157 | val ppl 1.02
+step  1250 | train loss 0.2795 | val acc 1.000 | val loss 0.0026 | val ppl 1.00
+step  1500 | train loss 0.2530 | val acc 1.000 | val loss 0.0022 | val ppl 1.00
+step  1750 | train loss 0.2492 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  2000 | train loss 0.2209 | val acc 1.000 | val loss 0.0017 | val ppl 1.00
+step  2250 | train loss 0.2080 | val acc 1.000 | val loss 0.0017 | val ppl 1.00
+step  2500 | train loss 0.2469 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  2750 | train loss 0.2184 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  3000 | train loss 0.2170 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  3250 | train loss 0.2171 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  3500 | train loss 0.2207 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  3750 | train loss 0.2262 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  4000 | train loss 0.2578 | val acc 1.000 | val loss 0.0020 | val ppl 1.00
+step  4250 | train loss 0.1950 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  4500 | train loss 0.2087 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  4750 | train loss 0.2443 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  5000 | train loss 0.2250 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  5250 | train loss 0.2276 | val acc 1.000 | val loss 0.0016 | val ppl 1.00
+step  5500 | train loss 0.2031 | val acc 1.000 | val loss 0.0019 | val ppl 1.00
+step  5750 | train loss 0.2021 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  6000 | train loss 0.1965 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  6250 | train loss 0.2037 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  6500 | train loss 0.1966 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  6750 | train loss 0.1975 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  7000 | train loss 0.1941 | val acc 1.000 | val loss 0.0017 | val ppl 1.00
+step  7250 | train loss 0.1808 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  7500 | train loss 0.1877 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  7750 | train loss 0.1944 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  8000 | train loss 0.2038 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+gen 3 | test acc 1.000 | real q-label nll 0.0011 acc 0.9999 | next-sym KL 0.2866 out-of-ctx mass 0.0795 query p 0.340 (true 0.341) | next-label nll 0.0112 acc 0.9993
+gen 3 | generated: q-label ok 0.999 | next-sym in ctx 0.920 | =query 0.345 | next-label ok 0.991 | H(sym id) 3.434 | H(choice) 1.479 | H(labels) 2.079
+
+=== generation 4 (variant=extended, seed=4) ===
+step     0 | train loss 3.7189 | val acc 0.101 | val loss 3.4918 | val ppl 32.84
+step   250 | train loss 1.1870 | val acc 0.491 | val loss 1.0478 | val ppl 2.85
+step   500 | train loss 1.0933 | val acc 0.513 | val loss 1.0157 | val ppl 2.76
+step   750 | train loss 0.3159 | val acc 1.000 | val loss 0.0061 | val ppl 1.01
+step  1000 | train loss 0.2997 | val acc 1.000 | val loss 0.0035 | val ppl 1.00
+step  1250 | train loss 0.2610 | val acc 1.000 | val loss 0.0022 | val ppl 1.00
+step  1500 | train loss 0.2554 | val acc 1.000 | val loss 0.0017 | val ppl 1.00
+step  1750 | train loss 0.2453 | val acc 1.000 | val loss 0.0021 | val ppl 1.00
+step  2000 | train loss 0.2172 | val acc 1.000 | val loss 0.0019 | val ppl 1.00
+step  2250 | train loss 0.2010 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  2500 | train loss 0.2424 | val acc 1.000 | val loss 0.0030 | val ppl 1.00
+step  2750 | train loss 0.2142 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  3000 | train loss 0.2405 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  3250 | train loss 0.2459 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  3500 | train loss 0.2363 | val acc 1.000 | val loss 0.0024 | val ppl 1.00
+step  3750 | train loss 0.2331 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  4000 | train loss 0.2047 | val acc 1.000 | val loss 0.0013 | val ppl 1.00
+step  4250 | train loss 0.2454 | val acc 1.000 | val loss 0.0013 | val ppl 1.00
+step  4500 | train loss 0.2318 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  4750 | train loss 0.1897 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  5000 | train loss 0.2057 | val acc 1.000 | val loss 0.0015 | val ppl 1.00
+step  5250 | train loss 0.2189 | val acc 1.000 | val loss 0.0013 | val ppl 1.00
+step  5500 | train loss 0.2109 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  5750 | train loss 0.2104 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  6000 | train loss 0.2335 | val acc 1.000 | val loss 0.0020 | val ppl 1.00
+step  6250 | train loss 0.2129 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  6500 | train loss 0.2094 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  6750 | train loss 0.2170 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  7000 | train loss 0.2422 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  7250 | train loss 0.2356 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  7500 | train loss 0.2024 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  7750 | train loss 0.2188 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  8000 | train loss 0.2025 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+gen 4 | test acc 1.000 | real q-label nll 0.0008 acc 1.0000 | next-sym KL 0.3327 out-of-ctx mass 0.0981 query p 0.336 (true 0.341) | next-label nll 0.0105 acc 0.9997
+gen 4 | generated: q-label ok 0.999 | next-sym in ctx 0.903 | =query 0.338 | next-label ok 0.991 | H(sym id) 3.433 | H(choice) 1.496 | H(labels) 2.079
+
+=== generation 5 (variant=extended, seed=5) ===
+step     0 | train loss 3.6925 | val acc 0.180 | val loss 3.4069 | val ppl 30.17
+step   250 | train loss 1.2155 | val acc 0.499 | val loss 1.0471 | val ppl 2.85
+step   500 | train loss 1.1189 | val acc 0.512 | val loss 1.0201 | val ppl 2.77
+step   750 | train loss 1.0549 | val acc 0.509 | val loss 1.0114 | val ppl 2.75
+step  1000 | train loss 0.2994 | val acc 0.999 | val loss 0.0062 | val ppl 1.01
+step  1250 | train loss 0.2739 | val acc 0.999 | val loss 0.0037 | val ppl 1.00
+step  1500 | train loss 0.2517 | val acc 1.000 | val loss 0.0021 | val ppl 1.00
+step  1750 | train loss 0.2448 | val acc 0.999 | val loss 0.0052 | val ppl 1.01
+step  2000 | train loss 0.2327 | val acc 1.000 | val loss 0.0020 | val ppl 1.00
+step  2250 | train loss 0.2567 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  2500 | train loss 0.2421 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  2750 | train loss 0.2074 | val acc 1.000 | val loss 0.0015 | val ppl 1.00
+step  3000 | train loss 0.2374 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  3250 | train loss 0.2246 | val acc 1.000 | val loss 0.0019 | val ppl 1.00
+step  3500 | train loss 0.2410 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  3750 | train loss 0.2286 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  4000 | train loss 0.2457 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  4250 | train loss 0.2496 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  4500 | train loss 0.2210 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  4750 | train loss 0.2361 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  5000 | train loss 0.2034 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  5250 | train loss 0.2505 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  5500 | train loss 0.2421 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  5750 | train loss 0.2282 | val acc 1.000 | val loss 0.0022 | val ppl 1.00
+step  6000 | train loss 0.2345 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  6250 | train loss 0.2316 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  6500 | train loss 0.2429 | val acc 0.999 | val loss 0.0024 | val ppl 1.00
+step  6750 | train loss 0.2669 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  7000 | train loss 0.2050 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  7250 | train loss 0.2357 | val acc 1.000 | val loss 0.0024 | val ppl 1.00
+step  7500 | train loss 0.2381 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  7750 | train loss 0.2690 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  8000 | train loss 0.2209 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+gen 5 | test acc 1.000 | real q-label nll 0.0005 acc 1.0000 | next-sym KL 0.4076 out-of-ctx mass 0.1175 query p 0.335 (true 0.341) | next-label nll 0.0064 acc 0.9997
+gen 5 | generated: q-label ok 0.999 | next-sym in ctx 0.881 | =query 0.335 | next-label ok 0.994 | H(sym id) 3.422 | H(choice) 1.513 | H(labels) 2.079
+
+=== generation 6 (variant=extended, seed=6) ===
+step     0 | train loss 3.7152 | val acc 0.127 | val loss 3.4279 | val ppl 30.81
+step   250 | train loss 1.1899 | val acc 0.514 | val loss 1.0400 | val ppl 2.83
+step   500 | train loss 1.1046 | val acc 0.515 | val loss 1.0176 | val ppl 2.77
+step   750 | train loss 0.4424 | val acc 0.951 | val loss 0.1714 | val ppl 1.19
+step  1000 | train loss 0.3358 | val acc 0.999 | val loss 0.0049 | val ppl 1.00
+step  1250 | train loss 0.3134 | val acc 1.000 | val loss 0.0024 | val ppl 1.00
+step  1500 | train loss 0.3021 | val acc 1.000 | val loss 0.0018 | val ppl 1.00
+step  1750 | train loss 0.2914 | val acc 1.000 | val loss 0.0020 | val ppl 1.00
+step  2000 | train loss 0.2741 | val acc 1.000 | val loss 0.0041 | val ppl 1.00
+step  2250 | train loss 0.2549 | val acc 1.000 | val loss 0.0016 | val ppl 1.00
+step  2500 | train loss 0.2866 | val acc 0.996 | val loss 0.0145 | val ppl 1.01
+step  2750 | train loss 0.2748 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  3000 | train loss 0.2713 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  3250 | train loss 0.2089 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  3500 | train loss 0.2346 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  3750 | train loss 0.2361 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  4000 | train loss 0.2159 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  4250 | train loss 0.2311 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  4500 | train loss 0.2352 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  4750 | train loss 0.2679 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  5000 | train loss 0.2658 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  5250 | train loss 0.2443 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  5500 | train loss 0.2509 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  5750 | train loss 0.2283 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  6000 | train loss 0.2670 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  6250 | train loss 0.2368 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  6500 | train loss 0.2332 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  6750 | train loss 0.2299 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step  7000 | train loss 0.2166 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  7250 | train loss 0.2620 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  7500 | train loss 0.2595 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  7750 | train loss 0.2291 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  8000 | train loss 0.2542 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+gen 6 | test acc 1.000 | real q-label nll 0.0006 acc 1.0000 | next-sym KL 0.5007 out-of-ctx mass 0.1391 query p 0.331 (true 0.341) | next-label nll 0.0064 acc 0.9999
+gen 6 | generated: q-label ok 0.999 | next-sym in ctx 0.860 | =query 0.334 | next-label ok 0.995 | H(sym id) 3.415 | H(choice) 1.522 | H(labels) 2.079
+
+=== generation 7 (variant=extended, seed=7) ===
+step     0 | train loss 3.7237 | val acc 0.159 | val loss 3.4175 | val ppl 30.49
+step   250 | train loss 1.2128 | val acc 0.507 | val loss 1.0396 | val ppl 2.83
+step   500 | train loss 1.1170 | val acc 0.527 | val loss 0.9935 | val ppl 2.70
+step   750 | train loss 0.3198 | val acc 1.000 | val loss 0.0069 | val ppl 1.01
+step  1000 | train loss 0.3366 | val acc 0.999 | val loss 0.0040 | val ppl 1.00
+step  1250 | train loss 0.3345 | val acc 1.000 | val loss 0.0024 | val ppl 1.00
+step  1500 | train loss 0.2813 | val acc 1.000 | val loss 0.0022 | val ppl 1.00
+step  1750 | train loss 0.2749 | val acc 1.000 | val loss 0.0032 | val ppl 1.00
+step  2000 | train loss 0.2565 | val acc 1.000 | val loss 0.0015 | val ppl 1.00
+step  2250 | train loss 0.2586 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  2500 | train loss 0.2440 | val acc 1.000 | val loss 0.0017 | val ppl 1.00
+step  2750 | train loss 0.2645 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  3000 | train loss 0.2958 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  3250 | train loss 0.2466 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  3500 | train loss 0.2575 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  3750 | train loss 0.2345 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step  4000 | train loss 0.2211 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  4250 | train loss 0.2415 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  4500 | train loss 0.2551 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  4750 | train loss 0.2869 | val acc 1.000 | val loss 0.0013 | val ppl 1.00
+step  5000 | train loss 0.2509 | val acc 1.000 | val loss 0.0014 | val ppl 1.00
+step  5250 | train loss 0.2510 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  5500 | train loss 0.2633 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  5750 | train loss 0.2336 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  6000 | train loss 0.2119 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  6250 | train loss 0.2476 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  6500 | train loss 0.2664 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  6750 | train loss 0.2540 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  7000 | train loss 0.2325 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  7250 | train loss 0.2242 | val acc 0.999 | val loss 0.0052 | val ppl 1.01
+step  7500 | train loss 0.2502 | val acc 1.000 | val loss 0.0016 | val ppl 1.00
+step  7750 | train loss 0.2376 | val acc 0.999 | val loss 0.0022 | val ppl 1.00
+step  8000 | train loss 0.2232 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+gen 7 | test acc 1.000 | real q-label nll 0.0010 acc 1.0000 | next-sym KL 0.5584 out-of-ctx mass 0.1484 query p 0.325 (true 0.341) | next-label nll 0.0129 acc 0.9988
+gen 7 | generated: q-label ok 0.999 | next-sym in ctx 0.852 | =query 0.327 | next-label ok 0.991 | H(sym id) 3.401 | H(choice) 1.530 | H(labels) 2.079
+
+gen,seed,test_acc,next_label_entropy
+0,0,0.9998,2.0794
+1,1,1.0000,2.0794
+2,2,1.0000,2.0794
+3,3,1.0000,2.0793
+4,4,1.0000,2.0793
+5,5,1.0000,2.0791
+6,6,0.9998,2.0791
+7,7,1.0000,2.0792
+
+real data | q-label ok 1.000 | next-sym in ctx 1.000 | =query 0.343 | next-label ok 1.000 | H(sym id) 3.466 | H(choice) 1.320 | H(labels) 2.079
+gen 0    | q-label ok 0.999 | next-sym in ctx 0.978 | =query 0.347 | next-label ok 0.999 | H(sym id) 3.458 | H(choice) 1.393 | H(labels) 2.079
+gen 1    | q-label ok 0.999 | next-sym in ctx 0.959 | =query 0.346 | next-label ok 0.997 | H(sym id) 3.455 | H(choice) 1.432 | H(labels) 2.079
+gen 2    | q-label ok 0.999 | next-sym in ctx 0.938 | =query 0.346 | next-label ok 0.996 | H(sym id) 3.446 | H(choice) 1.460 | H(labels) 2.079
+gen 3    | q-label ok 0.999 | next-sym in ctx 0.920 | =query 0.345 | next-label ok 0.991 | H(sym id) 3.434 | H(choice) 1.479 | H(labels) 2.079
+gen 4    | q-label ok 0.999 | next-sym in ctx 0.903 | =query 0.338 | next-label ok 0.991 | H(sym id) 3.433 | H(choice) 1.496 | H(labels) 2.079
+gen 5    | q-label ok 0.999 | next-sym in ctx 0.881 | =query 0.335 | next-label ok 0.994 | H(sym id) 3.422 | H(choice) 1.513 | H(labels) 2.079
+gen 6    | q-label ok 0.999 | next-sym in ctx 0.860 | =query 0.334 | next-label ok 0.995 | H(sym id) 3.415 | H(choice) 1.522 | H(labels) 2.079
+gen 7    | q-label ok 0.999 | next-sym in ctx 0.852 | =query 0.327 | next-label ok 0.991 | H(sym id) 3.401 | H(choice) 1.530 | H(labels) 2.079
+
+gen 0    | real q-label nll 0.0019 acc 0.9996 | next-sym KL 0.0986 out-of-ctx mass 0.0224 query p 0.345 (true 0.341) | next-label nll 0.0016 acc 0.9995
+gen 1    | real q-label nll 0.0017 acc 0.9998 | next-sym KL 0.1532 out-of-ctx mass 0.0415 query p 0.344 (true 0.341) | next-label nll 0.0041 acc 0.9993
+gen 2    | real q-label nll 0.0014 acc 0.9997 | next-sym KL 0.2184 out-of-ctx mass 0.0620 query p 0.341 (true 0.341) | next-label nll 0.0055 acc 0.9998
+gen 3    | real q-label nll 0.0011 acc 0.9999 | next-sym KL 0.2866 out-of-ctx mass 0.0795 query p 0.340 (true 0.341) | next-label nll 0.0112 acc 0.9993
+gen 4    | real q-label nll 0.0008 acc 1.0000 | next-sym KL 0.3327 out-of-ctx mass 0.0981 query p 0.336 (true 0.341) | next-label nll 0.0105 acc 0.9997
+gen 5    | real q-label nll 0.0005 acc 1.0000 | next-sym KL 0.4076 out-of-ctx mass 0.1175 query p 0.335 (true 0.341) | next-label nll 0.0064 acc 0.9997
+gen 6    | real q-label nll 0.0006 acc 1.0000 | next-sym KL 0.5007 out-of-ctx mass 0.1391 query p 0.331 (true 0.341) | next-label nll 0.0064 acc 0.9999
+gen 7    | real q-label nll 0.0010 acc 1.0000 | next-sym KL 0.5584 out-of-ctx mass 0.1484 query p 0.325 (true 0.341) | next-label nll 0.0129 acc 0.9988
+saved results to results/v2/ext_t1/collapse.json
+
+=== gen 0 (results/v2/ext_t1/gen0.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.389, 1.0, 1.0], [0.995, 0.834, 1.0, 0.675]]
+  zero one head     [layer x head]: [[1.0, 0.383, 1.0, 1.0], [1.0, 0.992, 1.0, 0.961]]
+  resample whole layer: [0.378, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.81, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  choice intact: kl 0.0967, mass_out 0.0218, query_prob 0.3493, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.01/0.93/0.04/0.02 | resampled: KL 0.468 out 0.097 query p 0.316
+  L0H1 attn q/sym/lab/self 0.02/0.88/0.07/0.04 | resampled: KL 0.442 out 0.099 query p 0.318
+  L0H2 attn q/sym/lab/self 0.01/0.92/0.05/0.01 | resampled: KL 0.526 out 0.131 query p 0.300
+  L0H3 attn q/sym/lab/self 0.01/0.95/0.03/0.02 | resampled: KL 0.409 out 0.117 query p 0.309
+  L1H0 attn q/sym/lab/self 0.01/0.89/0.09/0.02 | resampled: KL 0.335 out 0.057 query p 0.331
+  L1H1 attn q/sym/lab/self 0.01/0.91/0.06/0.01 | resampled: KL 0.401 out 0.068 query p 0.328
+  L1H2 attn q/sym/lab/self 0.02/0.87/0.08/0.03 | resampled: KL 0.404 out 0.057 query p 0.328
+  L1H3 attn q/sym/lab/self 0.01/0.93/0.06/0.00 | resampled: KL 0.367 out 0.071 query p 0.326
+
+=== gen 1 (results/v2/ext_t1/gen1.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.871, 0.93, 1.0], [1.0, 0.874, 0.954, 0.993]]
+  zero one head     [layer x head]: [[1.0, 0.968, 0.998, 1.0], [1.0, 0.996, 0.999, 1.0]]
+  resample whole layer: [0.388, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.99, 1.0], [1.0, 0.996, 1.0], [1.0, 1.0, 1.0]]
+  choice intact: kl 0.1529, mass_out 0.0414, query_prob 0.3495, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.581 out 0.176 query p 0.288
+  L0H1 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.430 out 0.115 query p 0.317
+  L0H2 attn q/sym/lab/self 0.03/0.93/0.03/0.02 | resampled: KL 0.404 out 0.104 query p 0.325
+  L0H3 attn q/sym/lab/self 0.03/0.90/0.07/0.01 | resampled: KL 0.495 out 0.136 query p 0.303
+  L1H0 attn q/sym/lab/self 0.03/0.90/0.07/0.01 | resampled: KL 0.442 out 0.082 query p 0.326
+  L1H1 attn q/sym/lab/self 0.02/0.95/0.03/0.00 | resampled: KL 0.536 out 0.101 query p 0.320
+  L1H2 attn q/sym/lab/self 0.03/0.93/0.04/0.00 | resampled: KL 0.451 out 0.082 query p 0.324
+  L1H3 attn q/sym/lab/self 0.02/0.93/0.05/0.01 | resampled: KL 0.454 out 0.100 query p 0.323
+
+=== gen 2 (results/v2/ext_t1/gen2.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 1.0, 1.0, 0.399], [1.0, 0.686, 0.709, 1.0]]
+  zero one head     [layer x head]: [[1.0, 1.0, 1.0, 0.412], [1.0, 0.975, 0.996, 1.0]]
+  resample whole layer: [0.312, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.819, 1.0]]
+  choice intact: kl 0.2208, mass_out 0.0609, query_prob 0.3478, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.95/0.02/0.01 | resampled: KL 0.640 out 0.169 query p 0.296
+  L0H1 attn q/sym/lab/self 0.03/0.93/0.04/0.01 | resampled: KL 0.816 out 0.205 query p 0.287
+  L0H2 attn q/sym/lab/self 0.02/0.92/0.04/0.02 | resampled: KL 0.656 out 0.196 query p 0.290
+  L0H3 attn q/sym/lab/self 0.02/0.91/0.04/0.03 | resampled: KL 0.743 out 0.193 query p 0.288
+  L1H0 attn q/sym/lab/self 0.03/0.87/0.08/0.02 | resampled: KL 0.520 out 0.101 query p 0.328
+  L1H1 attn q/sym/lab/self 0.00/0.31/0.04/0.64 | resampled: KL 0.236 out 0.067 query p 0.344
+  L1H2 attn q/sym/lab/self 0.03/0.92/0.03/0.02 | resampled: KL 0.413 out 0.090 query p 0.331
+  L1H3 attn q/sym/lab/self 0.03/0.77/0.17/0.03 | resampled: KL 0.362 out 0.096 query p 0.332
+
+=== gen 3 (results/v2/ext_t1/gen3.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 1.0, 1.0, 0.411], [0.737, 0.998, 0.995, 0.996]]
+  zero one head     [layer x head]: [[1.0, 1.0, 1.0, 0.413], [0.991, 1.0, 1.0, 1.0]]
+  resample whole layer: [0.352, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.973, 1.0]]
+  choice intact: kl 0.2901, mass_out 0.0782, query_prob 0.3484, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.91/0.06/0.01 | resampled: KL 0.588 out 0.165 query p 0.304
+  L0H1 attn q/sym/lab/self 0.02/0.94/0.03/0.01 | resampled: KL 0.514 out 0.158 query p 0.310
+  L0H2 attn q/sym/lab/self 0.02/0.94/0.02/0.01 | resampled: KL 0.622 out 0.188 query p 0.299
+  L0H3 attn q/sym/lab/self 0.02/0.90/0.05/0.03 | resampled: KL 0.562 out 0.200 query p 0.296
+  L1H0 attn q/sym/lab/self 0.02/0.95/0.02/0.00 | resampled: KL 0.524 out 0.123 query p 0.324
+  L1H1 attn q/sym/lab/self 0.04/0.85/0.11/0.01 | resampled: KL 0.593 out 0.127 query p 0.322
+  L1H2 attn q/sym/lab/self 0.03/0.93/0.03/0.01 | resampled: KL 0.566 out 0.125 query p 0.320
+  L1H3 attn q/sym/lab/self 0.03/0.91/0.06/0.00 | resampled: KL 0.500 out 0.132 query p 0.322
+
+=== gen 4 (results/v2/ext_t1/gen4.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.969, 1.0, 0.869], [1.0, 1.0, 1.0, 0.12]]
+  zero one head     [layer x head]: [[1.0, 0.998, 1.0, 0.989], [1.0, 1.0, 1.0, 0.598]]
+  resample whole layer: [0.399, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  choice intact: kl 0.3388, mass_out 0.0971, query_prob 0.3455, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.03/0.91/0.05/0.01 | resampled: KL 0.626 out 0.205 query p 0.296
+  L0H1 attn q/sym/lab/self 0.03/0.92/0.03/0.02 | resampled: KL 0.513 out 0.145 query p 0.322
+  L0H2 attn q/sym/lab/self 0.01/0.94/0.04/0.01 | resampled: KL 0.648 out 0.192 query p 0.301
+  L0H3 attn q/sym/lab/self 0.03/0.94/0.02/0.01 | resampled: KL 0.515 out 0.144 query p 0.316
+  L1H0 attn q/sym/lab/self 0.03/0.90/0.06/0.01 | resampled: KL 0.567 out 0.146 query p 0.320
+  L1H1 attn q/sym/lab/self 0.04/0.92/0.04/0.00 | resampled: KL 0.551 out 0.159 query p 0.312
+  L1H2 attn q/sym/lab/self 0.03/0.93/0.03/0.01 | resampled: KL 0.626 out 0.167 query p 0.308
+  L1H3 attn q/sym/lab/self 0.02/0.95/0.03/0.00 | resampled: KL 0.641 out 0.205 query p 0.293
+
+=== gen 5 (results/v2/ext_t1/gen5.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.395, 1.0, 1.0], [1.0, 0.499, 1.0, 0.984]]
+  zero one head     [layer x head]: [[1.0, 0.358, 1.0, 1.0], [1.0, 0.991, 1.0, 1.0]]
+  resample whole layer: [0.279, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.938, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  choice intact: kl 0.4103, mass_out 0.1162, query_prob 0.3422, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.03/0.90/0.05/0.01 | resampled: KL 0.817 out 0.248 query p 0.280
+  L0H1 attn q/sym/lab/self 0.03/0.92/0.03/0.02 | resampled: KL 0.890 out 0.303 query p 0.261
+  L0H2 attn q/sym/lab/self 0.03/0.95/0.02/0.01 | resampled: KL 0.990 out 0.296 query p 0.262
+  L0H3 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.893 out 0.246 query p 0.280
+  L1H0 attn q/sym/lab/self 0.03/0.82/0.14/0.01 | resampled: KL 0.649 out 0.163 query p 0.315
+  L1H1 attn q/sym/lab/self 0.00/0.99/0.01/0.00 | resampled: KL 0.413 out 0.119 query p 0.340
+  L1H2 attn q/sym/lab/self 0.00/0.78/0.22/0.00 | resampled: KL 0.482 out 0.131 query p 0.335
+  L1H3 attn q/sym/lab/self 0.00/0.99/0.01/0.00 | resampled: KL 0.410 out 0.118 query p 0.341
+
+=== gen 6 (results/v2/ext_t1/gen6.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.785, 1.0, 1.0, 0.865], [1.0, 0.993, 0.954, 0.948]]
+  zero one head     [layer x head]: [[0.95, 1.0, 1.0, 0.99], [1.0, 1.0, 1.0, 1.0]]
+  resample whole layer: [0.275, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 0.993, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.997, 1.0]]
+  choice intact: kl 0.5017, mass_out 0.1386, query_prob 0.3363, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.93/0.03/0.01 | resampled: KL 0.904 out 0.242 query p 0.286
+  L0H1 attn q/sym/lab/self 0.03/0.93/0.02/0.01 | resampled: KL 1.241 out 0.385 query p 0.231
+  L0H2 attn q/sym/lab/self 0.03/0.93/0.04/0.01 | resampled: KL 1.109 out 0.351 query p 0.241
+  L0H3 attn q/sym/lab/self 0.03/0.94/0.02/0.01 | resampled: KL 0.914 out 0.258 query p 0.277
+  L1H0 attn q/sym/lab/self 0.00/0.84/0.16/0.00 | resampled: KL 0.537 out 0.149 query p 0.331
+  L1H1 attn q/sym/lab/self 0.00/0.96/0.04/0.00 | resampled: KL 0.501 out 0.139 query p 0.336
+  L1H2 attn q/sym/lab/self 0.00/0.99/0.01/0.00 | resampled: KL 0.503 out 0.140 query p 0.335
+  L1H3 attn q/sym/lab/self 0.00/0.99/0.00/0.00 | resampled: KL 0.504 out 0.141 query p 0.335
+
+=== gen 7 (results/v2/ext_t1/gen7.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.389, 1.0, 1.0, 1.0], [0.998, 0.986, 0.728, 1.0]]
+  zero one head     [layer x head]: [[0.404, 1.0, 1.0, 1.0], [0.993, 0.999, 0.987, 1.0]]
+  resample whole layer: [0.337, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 0.989, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  choice intact: kl 0.5581, mass_out 0.1481, query_prob 0.3341, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.92/0.04/0.01 | resampled: KL 0.725 out 0.222 query p 0.298
+  L0H1 attn q/sym/lab/self 0.02/0.92/0.05/0.01 | resampled: KL 0.673 out 0.204 query p 0.306
+  L0H2 attn q/sym/lab/self 0.04/0.91/0.04/0.01 | resampled: KL 0.706 out 0.226 query p 0.295
+  L0H3 attn q/sym/lab/self 0.03/0.93/0.04/0.01 | resampled: KL 0.776 out 0.244 query p 0.289
+  L1H0 attn q/sym/lab/self 0.02/0.91/0.06/0.00 | resampled: KL 0.742 out 0.197 query p 0.307
+  L1H1 attn q/sym/lab/self 0.03/0.93/0.04/0.00 | resampled: KL 0.710 out 0.247 query p 0.294
+  L1H2 attn q/sym/lab/self 0.03/0.93/0.05/0.00 | resampled: KL 0.779 out 0.217 query p 0.298
+  L1H3 attn q/sym/lab/self 0.03/0.90/0.07/0.00 | resampled: KL 0.825 out 0.203 query p 0.304
+
+saved results/v2/ext_t1/mechanism.json

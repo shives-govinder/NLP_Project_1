@@ -1,0 +1,5 @@
+data results/v2/ext_t1/data_gen7.pt | 28958 erroneous rows (14.48%) | delete none -> 200000 rows | targets all
+seed 0 | phase@1250 | val acc 0.999 | generated not-in-context 15.30% | real next-symbol KL 0.5595 (leak 0.1640, in-context 0.3956) | slope 1.278 | 6.9 min
+seed 1 | phase@1000 | val acc 0.998 | generated not-in-context 15.89% | real next-symbol KL 0.5860 (leak 0.1724, in-context 0.4136) | slope 1.311 | 6.6 min
+seed 2 | phase@1250 | val acc 1.000 | generated not-in-context 16.23% | real next-symbol KL 0.5903 (leak 0.1715, in-context 0.4188) | slope 1.291 | 6.8 min
+saved results/v2/formation/gen7.json

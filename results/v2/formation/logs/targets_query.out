@@ -1,0 +1,5 @@
+data real | 0 erroneous rows (0.00%) | delete none -> 200000 rows | targets query
+seed 0 | phase@6250 | val acc 1.000 | generated not-in-context 85.42% | real next-symbol KL 2.8118 (leak 1.8879, in-context 0.9239) | slope 0.344 | 7.7 min
+seed 1 | phase@7750 | val acc 0.990 | generated not-in-context 84.30% | real next-symbol KL 2.8630 (leak 1.8612, in-context 1.0019) | slope 0.358 | 6.8 min
+seed 2 | phase@6500 | val acc 1.000 | generated not-in-context 86.01% | real next-symbol KL 2.8092 (leak 1.9493, in-context 0.8599) | slope 0.308 | 8.0 min
+saved results/v2/formation/targets_query.json
