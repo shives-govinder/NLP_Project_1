@@ -1,0 +1,5 @@
+data real | 0 erroneous rows (0.00%) | delete none -> 200000 rows | targets query+symbol
+seed 0 | phase@1000 | val acc 1.000 | generated not-in-context 1.61% | real next-symbol KL 0.0832 (leak 0.0171, in-context 0.0661) | slope 0.997 | 6.9 min
+seed 1 | phase@750 | val acc 1.000 | generated not-in-context 1.92% | real next-symbol KL 0.0902 (leak 0.0186, in-context 0.0715) | slope 1.000 | 6.7 min
+seed 2 | phase@1000 | val acc 1.000 | generated not-in-context 1.84% | real next-symbol KL 0.0810 (leak 0.0177, in-context 0.0634) | slope 0.978 | 6.6 min
+saved results/v2/formation/targets_qsym.json

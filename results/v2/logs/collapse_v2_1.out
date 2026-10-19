@@ -1,0 +1,693 @@
+real-data reference | q-label ok 1.0000 | H(labels) 2.0794
+
+=== generation 0 (variant=base, seed=0) ===
+step     0 | train loss 3.7022 | val acc 0.137 | val loss 3.4350 | val ppl 31.03
+step   250 | train loss 0.9446 | val acc 0.501 | val loss 1.0509 | val ppl 2.86
+step   500 | train loss 0.9314 | val acc 0.509 | val loss 1.0118 | val ppl 2.75
+step   750 | train loss 0.8612 | val acc 0.514 | val loss 1.0125 | val ppl 2.75
+step  1000 | train loss 0.8926 | val acc 0.512 | val loss 1.0054 | val ppl 2.73
+step  1250 | train loss 0.8943 | val acc 0.514 | val loss 0.9964 | val ppl 2.71
+step  1500 | train loss 0.8822 | val acc 0.513 | val loss 0.9949 | val ppl 2.70
+step  1750 | train loss 0.8664 | val acc 0.513 | val loss 0.9963 | val ppl 2.71
+step  2000 | train loss 0.9090 | val acc 0.517 | val loss 0.9902 | val ppl 2.69
+step  2250 | train loss 0.8622 | val acc 0.513 | val loss 0.9956 | val ppl 2.71
+step  2500 | train loss 0.9119 | val acc 0.503 | val loss 0.9976 | val ppl 2.71
+step  2750 | train loss 0.8859 | val acc 0.511 | val loss 0.9959 | val ppl 2.71
+step  3000 | train loss 0.9022 | val acc 0.517 | val loss 0.9888 | val ppl 2.69
+step  3250 | train loss 0.8750 | val acc 0.520 | val loss 0.9944 | val ppl 2.70
+step  3500 | train loss 0.9168 | val acc 0.516 | val loss 0.9892 | val ppl 2.69
+step  3750 | train loss 0.9398 | val acc 0.516 | val loss 0.9941 | val ppl 2.70
+step  4000 | train loss 0.8578 | val acc 0.522 | val loss 0.9951 | val ppl 2.70
+step  4250 | train loss 0.9015 | val acc 0.522 | val loss 0.9904 | val ppl 2.69
+step  4500 | train loss 0.9137 | val acc 0.516 | val loss 0.9911 | val ppl 2.69
+step  4750 | train loss 0.8909 | val acc 0.525 | val loss 0.9916 | val ppl 2.70
+step  5000 | train loss 0.8865 | val acc 0.513 | val loss 0.9916 | val ppl 2.70
+step  5250 | train loss 0.8704 | val acc 0.522 | val loss 0.9875 | val ppl 2.68
+step  5500 | train loss 0.8815 | val acc 0.519 | val loss 0.9900 | val ppl 2.69
+step  5750 | train loss 0.8771 | val acc 0.519 | val loss 0.9874 | val ppl 2.68
+step  6000 | train loss 0.8712 | val acc 0.513 | val loss 0.9921 | val ppl 2.70
+step  6250 | train loss 0.8739 | val acc 0.513 | val loss 0.9872 | val ppl 2.68
+step  6500 | train loss 0.8764 | val acc 0.515 | val loss 0.9905 | val ppl 2.69
+step  6750 | train loss 0.8800 | val acc 0.517 | val loss 0.9913 | val ppl 2.69
+step  7000 | train loss 0.8808 | val acc 0.522 | val loss 0.9896 | val ppl 2.69
+step  7250 | train loss 0.8909 | val acc 0.516 | val loss 0.9922 | val ppl 2.70
+step  7500 | train loss 0.8886 | val acc 0.515 | val loss 0.9941 | val ppl 2.70
+step  7750 | train loss 0.0963 | val acc 0.956 | val loss 0.1133 | val ppl 1.12
+step  8000 | train loss 0.0190 | val acc 0.988 | val loss 0.0304 | val ppl 1.03
+step  8250 | train loss 0.0039 | val acc 0.999 | val loss 0.0041 | val ppl 1.00
+step  8500 | train loss 0.0021 | val acc 1.000 | val loss 0.0009 | val ppl 1.00
+step  8750 | train loss 0.0019 | val acc 0.999 | val loss 0.0011 | val ppl 1.00
+step  9000 | train loss 0.0117 | val acc 0.998 | val loss 0.0071 | val ppl 1.01
+step  9250 | train loss 0.0003 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step  9500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 11000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 11750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13500 | train loss 0.0381 | val acc 0.979 | val loss 0.0635 | val ppl 1.07
+step 13750 | train loss 0.0003 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step 14000 | train loss 0.0101 | val acc 0.997 | val loss 0.0108 | val ppl 1.01
+step 14250 | train loss 0.0002 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 14500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19250 | train loss 0.0050 | val acc 0.999 | val loss 0.0050 | val ppl 1.01
+step 19500 | train loss 0.0089 | val acc 0.996 | val loss 0.0139 | val ppl 1.01
+step 19750 | train loss 0.0004 | val acc 0.999 | val loss 0.0032 | val ppl 1.00
+step 20000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23500 | train loss 0.0153 | val acc 0.998 | val loss 0.0082 | val ppl 1.01
+step 23750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 24000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 25000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+gen 0 | test acc 1.000 | real q-label nll 0.0001 acc 1.0000
+gen 0 | generated: q-label ok 1.0000 | H(labels) 2.0794
+
+=== generation 1 (variant=base, seed=1) ===
+step     0 | train loss 3.7037 | val acc 0.136 | val loss 3.4563 | val ppl 31.70
+step   250 | train loss 0.9158 | val acc 0.492 | val loss 1.0498 | val ppl 2.86
+step   500 | train loss 0.8983 | val acc 0.509 | val loss 1.0115 | val ppl 2.75
+step   750 | train loss 0.8841 | val acc 0.501 | val loss 1.0146 | val ppl 2.76
+step  1000 | train loss 0.8954 | val acc 0.503 | val loss 1.0081 | val ppl 2.74
+step  1250 | train loss 0.8589 | val acc 0.514 | val loss 1.0057 | val ppl 2.73
+step  1500 | train loss 0.8990 | val acc 0.512 | val loss 1.0075 | val ppl 2.74
+step  1750 | train loss 0.9115 | val acc 0.513 | val loss 0.9994 | val ppl 2.72
+step  2000 | train loss 0.8878 | val acc 0.511 | val loss 0.9984 | val ppl 2.71
+step  2250 | train loss 0.8785 | val acc 0.515 | val loss 1.0017 | val ppl 2.72
+step  2500 | train loss 0.9043 | val acc 0.515 | val loss 0.9978 | val ppl 2.71
+step  2750 | train loss 0.8961 | val acc 0.511 | val loss 0.9976 | val ppl 2.71
+step  3000 | train loss 0.8939 | val acc 0.516 | val loss 0.9893 | val ppl 2.69
+step  3250 | train loss 0.6413 | val acc 0.649 | val loss 0.7802 | val ppl 2.18
+step  3500 | train loss 0.4924 | val acc 0.715 | val loss 0.5777 | val ppl 1.78
+step  3750 | train loss 0.4193 | val acc 0.732 | val loss 0.5469 | val ppl 1.73
+step  4000 | train loss 0.1100 | val acc 0.934 | val loss 0.1612 | val ppl 1.17
+step  4250 | train loss 0.0479 | val acc 0.971 | val loss 0.0704 | val ppl 1.07
+step  4500 | train loss 0.0258 | val acc 0.987 | val loss 0.0314 | val ppl 1.03
+step  4750 | train loss 0.0338 | val acc 0.990 | val loss 0.0281 | val ppl 1.03
+step  5000 | train loss 0.0088 | val acc 0.991 | val loss 0.0219 | val ppl 1.02
+step  5250 | train loss 0.0108 | val acc 0.993 | val loss 0.0209 | val ppl 1.02
+step  5500 | train loss 0.0256 | val acc 0.998 | val loss 0.0038 | val ppl 1.00
+step  5750 | train loss 0.0001 | val acc 0.998 | val loss 0.0062 | val ppl 1.01
+step  6000 | train loss 0.0070 | val acc 0.999 | val loss 0.0078 | val ppl 1.01
+step  6250 | train loss 0.0002 | val acc 1.000 | val loss 0.0007 | val ppl 1.00
+step  6500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  6750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  7000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  7250 | train loss 0.0047 | val acc 0.999 | val loss 0.0093 | val ppl 1.01
+step  7500 | train loss 0.0073 | val acc 0.998 | val loss 0.0083 | val ppl 1.01
+step  7750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  8000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  8250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  8500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  8750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  9000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  9250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step  9500 | train loss 0.0111 | val acc 1.000 | val loss 0.0053 | val ppl 1.01
+step  9750 | train loss 0.0001 | val acc 1.000 | val loss 0.0012 | val ppl 1.00
+step 10000 | train loss 0.0002 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step 10250 | train loss 0.0001 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step 10500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 10750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 11750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13500 | train loss 0.0003 | val acc 1.000 | val loss 0.0044 | val ppl 1.00
+step 13750 | train loss 0.0001 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step 14000 | train loss 0.0000 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step 14250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 14750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16750 | train loss 0.0003 | val acc 1.000 | val loss 0.0018 | val ppl 1.00
+step 17000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 17250 | train loss 0.0002 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 17500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 19250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20250 | train loss 0.0234 | val acc 0.995 | val loss 0.0193 | val ppl 1.02
+step 20500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 21000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21750 | train loss 0.0040 | val acc 0.999 | val loss 0.0033 | val ppl 1.00
+step 22000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 22250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 22500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23000 | train loss 0.0000 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 23250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24750 | train loss 0.0012 | val acc 0.999 | val loss 0.0142 | val ppl 1.01
+step 25000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+gen 1 | test acc 1.000 | real q-label nll 0.0001 acc 1.0000
+gen 1 | generated: q-label ok 0.9999 | H(labels) 2.0794
+
+=== generation 2 (variant=base, seed=2) ===
+step     0 | train loss 3.7132 | val acc 0.123 | val loss 3.4506 | val ppl 31.52
+step   250 | train loss 0.9336 | val acc 0.485 | val loss 1.0557 | val ppl 2.87
+step   500 | train loss 0.8756 | val acc 0.508 | val loss 1.0125 | val ppl 2.75
+step   750 | train loss 0.8929 | val acc 0.501 | val loss 1.0152 | val ppl 2.76
+step  1000 | train loss 0.8739 | val acc 0.519 | val loss 0.9991 | val ppl 2.72
+step  1250 | train loss 0.8639 | val acc 0.522 | val loss 0.9948 | val ppl 2.70
+step  1500 | train loss 0.8620 | val acc 0.509 | val loss 1.0038 | val ppl 2.73
+step  1750 | train loss 0.8956 | val acc 0.522 | val loss 0.9959 | val ppl 2.71
+step  2000 | train loss 0.9281 | val acc 0.516 | val loss 0.9955 | val ppl 2.71
+step  2250 | train loss 0.9056 | val acc 0.515 | val loss 0.9993 | val ppl 2.72
+step  2500 | train loss 0.9026 | val acc 0.515 | val loss 1.0002 | val ppl 2.72
+step  2750 | train loss 0.8728 | val acc 0.517 | val loss 0.9942 | val ppl 2.70
+step  3000 | train loss 0.9063 | val acc 0.517 | val loss 0.9972 | val ppl 2.71
+step  3250 | train loss 0.8704 | val acc 0.527 | val loss 0.9920 | val ppl 2.70
+step  3500 | train loss 0.8642 | val acc 0.517 | val loss 0.9960 | val ppl 2.71
+step  3750 | train loss 0.9141 | val acc 0.521 | val loss 0.9947 | val ppl 2.70
+step  4000 | train loss 0.8822 | val acc 0.518 | val loss 0.9992 | val ppl 2.72
+step  4250 | train loss 0.8998 | val acc 0.520 | val loss 0.9954 | val ppl 2.71
+step  4500 | train loss 0.9285 | val acc 0.514 | val loss 0.9972 | val ppl 2.71
+step  4750 | train loss 0.8828 | val acc 0.524 | val loss 0.9915 | val ppl 2.70
+step  5000 | train loss 0.8943 | val acc 0.520 | val loss 0.9946 | val ppl 2.70
+step  5250 | train loss 0.9171 | val acc 0.516 | val loss 0.9964 | val ppl 2.71
+step  5500 | train loss 0.8640 | val acc 0.512 | val loss 0.9919 | val ppl 2.70
+step  5750 | train loss 0.9001 | val acc 0.519 | val loss 0.9920 | val ppl 2.70
+step  6000 | train loss 0.8856 | val acc 0.515 | val loss 0.9940 | val ppl 2.70
+step  6250 | train loss 0.8675 | val acc 0.513 | val loss 0.9999 | val ppl 2.72
+step  6500 | train loss 0.1754 | val acc 0.935 | val loss 0.1709 | val ppl 1.19
+step  6750 | train loss 0.0045 | val acc 0.998 | val loss 0.0075 | val ppl 1.01
+step  7000 | train loss 0.0002 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  7250 | train loss 0.0019 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step  7500 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  7750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  8000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  8250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  8500 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  8750 | train loss 0.0001 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step  9000 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  9250 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  9500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 10000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10250 | train loss 0.1134 | val acc 0.975 | val loss 0.1029 | val ppl 1.11
+step 10500 | train loss 0.0068 | val acc 0.999 | val loss 0.0047 | val ppl 1.00
+step 10750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11500 | train loss 0.0001 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step 11750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 12000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 12750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13250 | train loss 0.0002 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 13500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 14000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 14750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15500 | train loss 0.0074 | val acc 0.999 | val loss 0.0060 | val ppl 1.01
+step 15750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18250 | train loss 0.0003 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step 18500 | train loss 0.0002 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 18750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 21250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 22000 | train loss 0.0000 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 22250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 22750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23500 | train loss 0.0061 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 25000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+gen 2 | test acc 1.000 | real q-label nll 0.0000 acc 1.0000
+gen 2 | generated: q-label ok 0.9999 | H(labels) 2.0794
+
+=== generation 3 (variant=base, seed=3) ===
+step     0 | train loss 3.7192 | val acc 0.165 | val loss 3.4535 | val ppl 31.61
+step   250 | train loss 0.9260 | val acc 0.503 | val loss 1.0331 | val ppl 2.81
+step   500 | train loss 0.9343 | val acc 0.512 | val loss 1.0094 | val ppl 2.74
+step   750 | train loss 0.9264 | val acc 0.517 | val loss 1.0034 | val ppl 2.73
+step  1000 | train loss 0.8889 | val acc 0.511 | val loss 1.0022 | val ppl 2.72
+step  1250 | train loss 0.8904 | val acc 0.518 | val loss 0.9964 | val ppl 2.71
+step  1500 | train loss 0.9015 | val acc 0.513 | val loss 1.0020 | val ppl 2.72
+step  1750 | train loss 0.8791 | val acc 0.517 | val loss 0.9968 | val ppl 2.71
+step  2000 | train loss 0.8905 | val acc 0.518 | val loss 0.9957 | val ppl 2.71
+step  2250 | train loss 0.8980 | val acc 0.505 | val loss 1.0046 | val ppl 2.73
+step  2500 | train loss 0.8898 | val acc 0.512 | val loss 0.9946 | val ppl 2.70
+step  2750 | train loss 0.8901 | val acc 0.515 | val loss 0.9925 | val ppl 2.70
+step  3000 | train loss 0.8719 | val acc 0.515 | val loss 0.9940 | val ppl 2.70
+step  3250 | train loss 0.8902 | val acc 0.517 | val loss 0.9940 | val ppl 2.70
+step  3500 | train loss 0.8846 | val acc 0.519 | val loss 0.9987 | val ppl 2.71
+step  3750 | train loss 0.9141 | val acc 0.520 | val loss 0.9915 | val ppl 2.70
+step  4000 | train loss 0.9171 | val acc 0.512 | val loss 0.9980 | val ppl 2.71
+step  4250 | train loss 0.0901 | val acc 0.949 | val loss 0.1771 | val ppl 1.19
+step  4500 | train loss 0.1582 | val acc 0.967 | val loss 0.1274 | val ppl 1.14
+step  4750 | train loss 0.0230 | val acc 0.988 | val loss 0.0324 | val ppl 1.03
+step  5000 | train loss 0.0032 | val acc 0.996 | val loss 0.0108 | val ppl 1.01
+step  5250 | train loss 0.0003 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step  5500 | train loss 0.0059 | val acc 0.999 | val loss 0.0023 | val ppl 1.00
+step  5750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  6000 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  6250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  6500 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  6750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  7000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  7250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  7500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  7750 | train loss 0.0260 | val acc 0.993 | val loss 0.0231 | val ppl 1.02
+step  8000 | train loss 0.0002 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  8250 | train loss 0.0029 | val acc 0.999 | val loss 0.0035 | val ppl 1.00
+step  8500 | train loss 0.0003 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  8750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10250 | train loss 0.0077 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 10500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 10750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11000 | train loss 0.0002 | val acc 1.000 | val loss 0.0006 | val ppl 1.00
+step 11250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11500 | train loss 0.0024 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step 11750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 12000 | train loss 0.0019 | val acc 0.999 | val loss 0.0025 | val ppl 1.00
+step 12250 | train loss 0.0002 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step 12500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 12750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 14500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 14750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15500 | train loss 0.0026 | val acc 0.999 | val loss 0.0029 | val ppl 1.00
+step 15750 | train loss 0.0005 | val acc 0.999 | val loss 0.0023 | val ppl 1.00
+step 16000 | train loss 0.0009 | val acc 0.998 | val loss 0.0055 | val ppl 1.01
+step 16250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 16750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 17000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 17250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 18500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18750 | train loss 0.0051 | val acc 0.997 | val loss 0.0076 | val ppl 1.01
+step 19000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 19250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 19500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22250 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 22500 | train loss 0.0003 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step 22750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23000 | train loss 0.0019 | val acc 1.000 | val loss 0.0022 | val ppl 1.00
+step 23250 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 23500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 25000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+gen 3 | test acc 1.000 | real q-label nll 0.0000 acc 1.0000
+gen 3 | generated: q-label ok 1.0000 | H(labels) 2.0794
+
+=== generation 4 (variant=base, seed=4) ===
+step     0 | train loss 3.7336 | val acc 0.125 | val loss 3.4522 | val ppl 31.57
+step   250 | train loss 0.9175 | val acc 0.490 | val loss 1.0470 | val ppl 2.85
+step   500 | train loss 0.8829 | val acc 0.511 | val loss 1.0164 | val ppl 2.76
+step   750 | train loss 0.9000 | val acc 0.505 | val loss 1.0043 | val ppl 2.73
+step  1000 | train loss 0.9077 | val acc 0.516 | val loss 1.0001 | val ppl 2.72
+step  1250 | train loss 0.8799 | val acc 0.511 | val loss 0.9977 | val ppl 2.71
+step  1500 | train loss 0.8706 | val acc 0.512 | val loss 1.0033 | val ppl 2.73
+step  1750 | train loss 0.8787 | val acc 0.509 | val loss 0.9972 | val ppl 2.71
+step  2000 | train loss 0.8738 | val acc 0.516 | val loss 0.9973 | val ppl 2.71
+step  2250 | train loss 0.8964 | val acc 0.519 | val loss 0.9947 | val ppl 2.70
+step  2500 | train loss 0.8723 | val acc 0.515 | val loss 0.9952 | val ppl 2.71
+step  2750 | train loss 0.8750 | val acc 0.521 | val loss 1.0002 | val ppl 2.72
+step  3000 | train loss 0.8980 | val acc 0.522 | val loss 0.9921 | val ppl 2.70
+step  3250 | train loss 0.8958 | val acc 0.514 | val loss 0.9935 | val ppl 2.70
+step  3500 | train loss 0.8806 | val acc 0.509 | val loss 0.9958 | val ppl 2.71
+step  3750 | train loss 0.8575 | val acc 0.515 | val loss 1.0009 | val ppl 2.72
+step  4000 | train loss 0.8906 | val acc 0.509 | val loss 0.9943 | val ppl 2.70
+step  4250 | train loss 0.8971 | val acc 0.511 | val loss 0.9943 | val ppl 2.70
+step  4500 | train loss 0.8939 | val acc 0.516 | val loss 0.9918 | val ppl 2.70
+step  4750 | train loss 0.8838 | val acc 0.518 | val loss 0.9908 | val ppl 2.69
+step  5000 | train loss 0.8827 | val acc 0.518 | val loss 0.9919 | val ppl 2.70
+step  5250 | train loss 0.8947 | val acc 0.524 | val loss 0.9922 | val ppl 2.70
+step  5500 | train loss 0.8852 | val acc 0.517 | val loss 0.9929 | val ppl 2.70
+step  5750 | train loss 0.8827 | val acc 0.517 | val loss 0.9905 | val ppl 2.69
+step  6000 | train loss 0.8573 | val acc 0.526 | val loss 0.9917 | val ppl 2.70
+step  6250 | train loss 0.8698 | val acc 0.519 | val loss 0.9928 | val ppl 2.70
+step  6500 | train loss 0.8770 | val acc 0.519 | val loss 0.9930 | val ppl 2.70
+step  6750 | train loss 0.8899 | val acc 0.522 | val loss 0.9869 | val ppl 2.68
+step  7000 | train loss 0.0629 | val acc 0.963 | val loss 0.0960 | val ppl 1.10
+step  7250 | train loss 0.0203 | val acc 0.986 | val loss 0.0360 | val ppl 1.04
+step  7500 | train loss 0.0102 | val acc 0.997 | val loss 0.0094 | val ppl 1.01
+step  7750 | train loss 0.0016 | val acc 0.999 | val loss 0.0023 | val ppl 1.00
+step  8000 | train loss 0.0006 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step  8250 | train loss 0.0003 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step  8500 | train loss 0.0010 | val acc 1.000 | val loss 0.0005 | val ppl 1.00
+step  8750 | train loss 0.0001 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step  9000 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  9250 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  9500 | train loss 0.0008 | val acc 0.992 | val loss 0.0268 | val ppl 1.03
+step  9750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 10000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 11000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 11500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 11750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12500 | train loss 0.1370 | val acc 0.950 | val loss 0.1535 | val ppl 1.17
+step 12750 | train loss 0.0050 | val acc 0.998 | val loss 0.0063 | val ppl 1.01
+step 13000 | train loss 0.0003 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step 13250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 13750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 14750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15500 | train loss 0.1016 | val acc 0.967 | val loss 0.1037 | val ppl 1.11
+step 15750 | train loss 0.0002 | val acc 1.000 | val loss 0.0003 | val ppl 1.00
+step 16000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18500 | train loss 0.0059 | val acc 0.998 | val loss 0.0032 | val ppl 1.00
+step 18750 | train loss 0.0004 | val acc 1.000 | val loss 0.0004 | val ppl 1.00
+step 19000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 19250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 19500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 19750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 20750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21750 | train loss 0.1789 | val acc 0.959 | val loss 0.1745 | val ppl 1.19
+step 22000 | train loss 0.0102 | val acc 0.999 | val loss 0.0027 | val ppl 1.00
+step 22250 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 22500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 22750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 23750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 24500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 25000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+gen 4 | test acc 1.000 | real q-label nll 0.0000 acc 1.0000
+gen 4 | generated: q-label ok 1.0000 | H(labels) 2.0794
+
+=== generation 5 (variant=base, seed=5) ===
+step     0 | train loss 3.7007 | val acc 0.142 | val loss 3.4102 | val ppl 30.27
+step   250 | train loss 0.8945 | val acc 0.501 | val loss 1.0378 | val ppl 2.82
+step   500 | train loss 0.9034 | val acc 0.500 | val loss 1.0165 | val ppl 2.76
+step   750 | train loss 0.8642 | val acc 0.513 | val loss 1.0040 | val ppl 2.73
+step  1000 | train loss 0.9008 | val acc 0.490 | val loss 1.0099 | val ppl 2.75
+step  1250 | train loss 0.9361 | val acc 0.513 | val loss 1.0058 | val ppl 2.73
+step  1500 | train loss 0.9051 | val acc 0.529 | val loss 0.9931 | val ppl 2.70
+step  1750 | train loss 0.8932 | val acc 0.523 | val loss 0.9971 | val ppl 2.71
+step  2000 | train loss 0.9289 | val acc 0.514 | val loss 0.9971 | val ppl 2.71
+step  2250 | train loss 0.8649 | val acc 0.507 | val loss 1.0032 | val ppl 2.73
+step  2500 | train loss 0.8988 | val acc 0.512 | val loss 0.9974 | val ppl 2.71
+step  2750 | train loss 0.9058 | val acc 0.505 | val loss 1.0012 | val ppl 2.72
+step  3000 | train loss 0.8888 | val acc 0.523 | val loss 0.9979 | val ppl 2.71
+step  3250 | train loss 0.9060 | val acc 0.507 | val loss 1.0029 | val ppl 2.73
+step  3500 | train loss 0.8796 | val acc 0.519 | val loss 0.9963 | val ppl 2.71
+step  3750 | train loss 0.9025 | val acc 0.514 | val loss 0.9932 | val ppl 2.70
+step  4000 | train loss 0.8936 | val acc 0.518 | val loss 0.9934 | val ppl 2.70
+step  4250 | train loss 0.8728 | val acc 0.521 | val loss 0.9943 | val ppl 2.70
+step  4500 | train loss 0.8331 | val acc 0.517 | val loss 0.9932 | val ppl 2.70
+step  4750 | train loss 0.8946 | val acc 0.519 | val loss 0.9945 | val ppl 2.70
+step  5000 | train loss 0.8668 | val acc 0.523 | val loss 0.9932 | val ppl 2.70
+step  5250 | train loss 0.9219 | val acc 0.518 | val loss 0.9930 | val ppl 2.70
+step  5500 | train loss 0.8768 | val acc 0.519 | val loss 0.9902 | val ppl 2.69
+step  5750 | train loss 0.9108 | val acc 0.524 | val loss 0.9978 | val ppl 2.71
+step  6000 | train loss 0.0927 | val acc 0.961 | val loss 0.0965 | val ppl 1.10
+step  6250 | train loss 0.0210 | val acc 0.988 | val loss 0.0322 | val ppl 1.03
+step  6500 | train loss 0.0114 | val acc 0.996 | val loss 0.0114 | val ppl 1.01
+step  6750 | train loss 0.0029 | val acc 0.997 | val loss 0.0099 | val ppl 1.01
+step  7000 | train loss 0.0049 | val acc 0.998 | val loss 0.0056 | val ppl 1.01
+step  7250 | train loss 0.0042 | val acc 0.999 | val loss 0.0035 | val ppl 1.00
+step  7500 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  7750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  8000 | train loss 0.0002 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  8250 | train loss 0.0029 | val acc 0.997 | val loss 0.0054 | val ppl 1.01
+step  8500 | train loss 0.0508 | val acc 0.991 | val loss 0.0302 | val ppl 1.03
+step  8750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step  9000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9250 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step  9750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 10000 | train loss 0.0540 | val acc 0.987 | val loss 0.0397 | val ppl 1.04
+step 10250 | train loss 0.0003 | val acc 0.999 | val loss 0.0046 | val ppl 1.00
+step 10500 | train loss 0.0002 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step 10750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 11750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 12750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13000 | train loss 0.0085 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 13250 | train loss 0.0279 | val acc 0.985 | val loss 0.0441 | val ppl 1.05
+step 13500 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 13750 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 14000 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 14750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 15500 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 15750 | train loss 0.0584 | val acc 0.983 | val loss 0.0536 | val ppl 1.06
+step 16000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16500 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 16750 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 17000 | train loss 0.0173 | val acc 0.995 | val loss 0.0199 | val ppl 1.02
+step 17250 | train loss 0.0001 | val acc 1.000 | val loss 0.0011 | val ppl 1.00
+step 17500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 17750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 18750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 19000 | train loss 0.0107 | val acc 0.999 | val loss 0.0074 | val ppl 1.01
+step 19250 | train loss 0.0001 | val acc 1.000 | val loss 0.0037 | val ppl 1.00
+step 19500 | train loss 0.0001 | val acc 1.000 | val loss 0.0008 | val ppl 1.00
+step 19750 | train loss 0.0050 | val acc 1.000 | val loss 0.0010 | val ppl 1.00
+step 20000 | train loss 0.0001 | val acc 1.000 | val loss 0.0002 | val ppl 1.00
+step 20250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 20750 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 21000 | train loss 0.0001 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 21250 | train loss 0.0000 | val acc 1.000 | val loss 0.0001 | val ppl 1.00
+step 21500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 21750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22250 | train loss 0.0023 | val acc 0.999 | val loss 0.0040 | val ppl 1.00
+step 22500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 22750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 23750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24250 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24500 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 24750 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+step 25000 | train loss 0.0000 | val acc 1.000 | val loss 0.0000 | val ppl 1.00
+gen 5 | test acc 1.000 | real q-label nll 0.0000 acc 1.0000
+gen 5 | generated: q-label ok 1.0000 | H(labels) 2.0794
+
+gen,seed,test_acc,next_label_entropy
+0,0,1.0000,2.0794
+1,1,1.0000,2.0794
+2,2,1.0000,2.0794
+3,3,1.0000,2.0794
+4,4,1.0000,2.0794
+5,5,1.0000,2.0794
+
+real data | q-label ok 1.0000 | H(labels) 2.0794
+gen 0    | q-label ok 1.0000 | H(labels) 2.0794
+gen 1    | q-label ok 0.9999 | H(labels) 2.0794
+gen 2    | q-label ok 0.9999 | H(labels) 2.0794
+gen 3    | q-label ok 1.0000 | H(labels) 2.0794
+gen 4    | q-label ok 1.0000 | H(labels) 2.0794
+gen 5    | q-label ok 1.0000 | H(labels) 2.0794
+
+gen 0    | real q-label nll 0.0001 acc 1.0000
+gen 1    | real q-label nll 0.0001 acc 1.0000
+gen 2    | real q-label nll 0.0000 acc 1.0000
+gen 3    | real q-label nll 0.0000 acc 1.0000
+gen 4    | real q-label nll 0.0000 acc 1.0000
+gen 5    | real q-label nll 0.0000 acc 1.0000
+saved results to results/v2/base/collapse.json
+
+=== gen 0 (results/v2/base/gen0.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.936, 1.0, 0.605, 0.9], [0.991, 1.0, 1.0, 0.412]]
+  zero one head     [layer x head]: [[1.0, 1.0, 0.947, 0.974], [1.0, 1.0, 1.0, 0.98]]
+  resample whole layer: [0.387, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 0.996, 1.0], [1.0, 1.0, 1.0], [1.0, 0.918, 1.0], [1.0, 0.987, 1.0]]
+
+=== gen 1 (results/v2/base/gen1.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.398, 1.0, 1.0, 1.0], [1.0, 0.184, 0.999, 1.0]]
+  zero one head     [layer x head]: [[0.359, 1.0, 1.0, 1.0], [1.0, 0.914, 1.0, 1.0]]
+  resample whole layer: [0.392, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 0.539, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 2 (results/v2/base/gen2.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.373, 1.0, 1.0], [1.0, 1.0, 0.974, 0.775]]
+  zero one head     [layer x head]: [[1.0, 0.291, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0]]
+  resample whole layer: [0.367, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.938, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 3 (results/v2/base/gen3.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.815, 1.0, 0.564, 1.0], [1.0, 1.0, 1.0, 0.136]]
+  zero one head     [layer x head]: [[0.999, 1.0, 0.974, 1.0], [1.0, 1.0, 1.0, 0.811]]
+  resample whole layer: [0.378, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 0.866, 1.0], [1.0, 1.0, 1.0], [1.0, 0.661, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 4 (results/v2/base/gen4.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.783, 0.604, 1.0], [1.0, 0.998, 0.946, 1.0]]
+  zero one head     [layer x head]: [[1.0, 0.984, 0.939, 1.0], [1.0, 1.0, 1.0, 1.0]]
+  resample whole layer: [0.405, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.953, 1.0], [1.0, 0.893, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 5 (results/v2/base/gen5.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 1.0, 1.0, 0.384], [1.0, 0.825, 1.0, 1.0]]
+  zero one head     [layer x head]: [[1.0, 1.0, 1.0, 0.273], [1.0, 0.999, 1.0, 1.0]]
+  resample whole layer: [0.381, 0.118]
+  path patch L0 head -> L1 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.566, 1.0]]
+
+saved results/v2/base/mechanism.json

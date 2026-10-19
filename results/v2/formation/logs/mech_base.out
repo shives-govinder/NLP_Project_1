@@ -1,0 +1,44 @@
+
+=== gen 0 (results/v2/base/gen0.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.936, 1.0, 0.605, 0.9], [0.991, 1.0, 1.0, 0.412]]
+  zero one head     [layer x head]: [[1.0, 1.0, 0.947, 0.974], [1.0, 1.0, 1.0, 0.98]]
+  resample whole layer: [0.387, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 0.996, 1.0], [1.0, 1.0, 1.0], [1.0, 0.918, 1.0], [1.0, 0.987, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 0.938, 1.0], [1.0, 1.0, 1.0], [1.0, 0.609, 0.999], [1.0, 0.9, 1.0]]
+
+=== gen 1 (results/v2/base/gen1.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.398, 1.0, 1.0, 1.0], [1.0, 0.184, 0.999, 1.0]]
+  zero one head     [layer x head]: [[0.359, 1.0, 1.0, 1.0], [1.0, 0.914, 1.0, 1.0]]
+  resample whole layer: [0.392, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 0.539, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 0.392, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 2 (results/v2/base/gen2.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.373, 1.0, 1.0], [1.0, 1.0, 0.974, 0.775]]
+  zero one head     [layer x head]: [[1.0, 0.291, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0]]
+  resample whole layer: [0.367, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.938, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.378, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 3 (results/v2/base/gen3.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.815, 1.0, 0.564, 1.0], [1.0, 1.0, 1.0, 0.136]]
+  zero one head     [layer x head]: [[0.999, 1.0, 0.974, 1.0], [1.0, 1.0, 1.0, 0.811]]
+  resample whole layer: [0.378, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 0.866, 1.0], [1.0, 1.0, 1.0], [1.0, 0.661, 1.0], [1.0, 1.0, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 0.816, 1.0], [1.0, 1.0, 1.0], [1.0, 0.568, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 4 (results/v2/base/gen4.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.783, 0.604, 1.0], [1.0, 0.998, 0.946, 1.0]]
+  zero one head     [layer x head]: [[1.0, 0.984, 0.939, 1.0], [1.0, 1.0, 1.0, 1.0]]
+  resample whole layer: [0.405, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.953, 1.0], [1.0, 0.893, 1.0], [1.0, 1.0, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.785, 1.0], [1.0, 0.606, 1.0], [1.0, 1.0, 1.0]]
+
+=== gen 5 (results/v2/base/gen5.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 1.0, 1.0, 0.384], [1.0, 0.825, 1.0, 1.0]]
+  zero one head     [layer x head]: [[1.0, 1.0, 1.0, 0.273], [1.0, 0.999, 1.0, 1.0]]
+  resample whole layer: [0.381, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.566, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.385, 1.0]]
+
+saved results/v2/base/mechanism.json

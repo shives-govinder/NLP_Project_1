@@ -1,0 +1,130 @@
+
+=== gen 0 (results/v2/ext_real10/gen0.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.389, 1.0, 1.0], [0.995, 0.834, 1.0, 0.675]]
+  zero one head     [layer x head]: [[1.0, 0.383, 1.0, 1.0], [1.0, 0.992, 1.0, 0.961]]
+  resample whole layer: [0.378, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.81, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.392, 0.997], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  choice intact: kl 0.0967, mass_out 0.0218, query_prob 0.3493, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.01/0.93/0.04/0.02 | resampled: KL 0.468 out 0.097 query p 0.316
+  L0H1 attn q/sym/lab/self 0.02/0.88/0.07/0.04 | resampled: KL 0.442 out 0.099 query p 0.318
+  L0H2 attn q/sym/lab/self 0.01/0.92/0.05/0.01 | resampled: KL 0.526 out 0.131 query p 0.300
+  L0H3 attn q/sym/lab/self 0.01/0.95/0.03/0.02 | resampled: KL 0.409 out 0.117 query p 0.309
+  L1H0 attn q/sym/lab/self 0.01/0.89/0.09/0.02 | resampled: KL 0.335 out 0.057 query p 0.331
+  L1H1 attn q/sym/lab/self 0.01/0.91/0.06/0.01 | resampled: KL 0.401 out 0.068 query p 0.328
+  L1H2 attn q/sym/lab/self 0.02/0.87/0.08/0.03 | resampled: KL 0.404 out 0.057 query p 0.328
+  L1H3 attn q/sym/lab/self 0.01/0.93/0.06/0.00 | resampled: KL 0.367 out 0.071 query p 0.326
+
+=== gen 1 (results/v2/ext_real10/gen1.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 0.929, 1.0, 0.882], [0.999, 0.955, 1.0, 0.922]]
+  zero one head     [layer x head]: [[1.0, 0.992, 1.0, 0.988], [0.999, 0.998, 1.0, 0.997]]
+  resample whole layer: [0.383, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.991, 1.0], [1.0, 1.0, 1.0], [0.999, 0.989, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 0.929, 1.0], [1.0, 1.0, 1.0], [1.0, 0.881, 1.0]]
+  choice intact: kl 0.1397, mass_out 0.0419, query_prob 0.3488, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.90/0.07/0.01 | resampled: KL 0.441 out 0.149 query p 0.299
+  L0H1 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.488 out 0.136 query p 0.307
+  L0H2 attn q/sym/lab/self 0.02/0.91/0.06/0.01 | resampled: KL 0.421 out 0.123 query p 0.312
+  L0H3 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.410 out 0.120 query p 0.315
+  L1H0 attn q/sym/lab/self 0.03/0.90/0.06/0.00 | resampled: KL 0.393 out 0.088 query p 0.326
+  L1H1 attn q/sym/lab/self 0.04/0.92/0.04/0.00 | resampled: KL 0.424 out 0.093 query p 0.324
+  L1H2 attn q/sym/lab/self 0.03/0.94/0.03/0.00 | resampled: KL 0.471 out 0.107 query p 0.316
+  L1H3 attn q/sym/lab/self 0.03/0.94/0.03/0.01 | resampled: KL 0.473 out 0.088 query p 0.325
+
+=== gen 2 (results/v2/ext_real10/gen2.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 1.0, 1.0, 0.401], [1.0, 0.989, 0.346, 1.0]]
+  zero one head     [layer x head]: [[1.0, 1.0, 1.0, 0.417], [1.0, 1.0, 0.93, 1.0]]
+  resample whole layer: [0.34, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.927, 0.999]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.419, 0.999]]
+  choice intact: kl 0.1954, mass_out 0.0587, query_prob 0.3419, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.591 out 0.165 query p 0.291
+  L0H1 attn q/sym/lab/self 0.02/0.93/0.04/0.01 | resampled: KL 0.598 out 0.164 query p 0.298
+  L0H2 attn q/sym/lab/self 0.02/0.94/0.03/0.01 | resampled: KL 0.566 out 0.175 query p 0.293
+  L0H3 attn q/sym/lab/self 0.01/0.95/0.03/0.01 | resampled: KL 0.599 out 0.153 query p 0.297
+  L1H0 attn q/sym/lab/self 0.02/0.88/0.09/0.01 | resampled: KL 0.518 out 0.104 query p 0.323
+  L1H1 attn q/sym/lab/self 0.02/0.92/0.04/0.02 | resampled: KL 0.469 out 0.104 query p 0.320
+  L1H2 attn q/sym/lab/self 0.02/0.95/0.02/0.01 | resampled: KL 0.348 out 0.093 query p 0.325
+  L1H3 attn q/sym/lab/self 0.02/0.70/0.26/0.02 | resampled: KL 0.374 out 0.092 query p 0.327
+
+=== gen 3 (results/v2/ext_real10/gen3.pt) | intact acc 1.000
+  resample one head [layer x head]: [[1.0, 1.0, 1.0, 0.414], [0.861, 0.83, 0.998, 1.0]]
+  zero one head     [layer x head]: [[1.0, 1.0, 1.0, 0.419], [0.997, 0.997, 1.0, 1.0]]
+  resample whole layer: [0.371, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.939, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.421, 1.0]]
+  choice intact: kl 0.2336, mass_out 0.0746, query_prob 0.3382, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.01/0.94/0.04/0.01 | resampled: KL 0.525 out 0.175 query p 0.296
+  L0H1 attn q/sym/lab/self 0.03/0.91/0.06/0.01 | resampled: KL 0.521 out 0.153 query p 0.297
+  L0H2 attn q/sym/lab/self 0.02/0.94/0.03/0.01 | resampled: KL 0.451 out 0.153 query p 0.302
+  L0H3 attn q/sym/lab/self 0.02/0.84/0.08/0.06 | resampled: KL 0.466 out 0.165 query p 0.298
+  L1H0 attn q/sym/lab/self 0.03/0.91/0.06/0.00 | resampled: KL 0.557 out 0.157 query p 0.303
+  L1H1 attn q/sym/lab/self 0.02/0.94/0.04/0.00 | resampled: KL 0.553 out 0.132 query p 0.310
+  L1H2 attn q/sym/lab/self 0.03/0.92/0.05/0.00 | resampled: KL 0.629 out 0.132 query p 0.307
+  L1H3 attn q/sym/lab/self 0.03/0.83/0.13/0.01 | resampled: KL 0.554 out 0.137 query p 0.308
+
+=== gen 4 (results/v2/ext_real10/gen4.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.992, 0.986, 1.0, 0.96], [1.0, 1.0, 1.0, 0.118]]
+  zero one head     [layer x head]: [[1.0, 0.998, 1.0, 0.996], [1.0, 1.0, 1.0, 0.434]]
+  resample whole layer: [0.399, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.999, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 0.992, 0.999], [1.0, 0.985, 1.0], [1.0, 1.0, 1.0], [1.0, 0.958, 1.0]]
+  choice intact: kl 0.2416, mass_out 0.0898, query_prob 0.3330, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.94/0.02/0.02 | resampled: KL 0.427 out 0.143 query p 0.310
+  L0H1 attn q/sym/lab/self 0.02/0.95/0.02/0.01 | resampled: KL 0.463 out 0.143 query p 0.311
+  L0H2 attn q/sym/lab/self 0.01/0.93/0.05/0.01 | resampled: KL 0.515 out 0.208 query p 0.286
+  L0H3 attn q/sym/lab/self 0.04/0.90/0.03/0.03 | resampled: KL 0.460 out 0.139 query p 0.309
+  L1H0 attn q/sym/lab/self 0.02/0.89/0.09/0.00 | resampled: KL 0.579 out 0.158 query p 0.300
+  L1H1 attn q/sym/lab/self 0.04/0.83/0.11/0.02 | resampled: KL 0.495 out 0.154 query p 0.299
+  L1H2 attn q/sym/lab/self 0.02/0.83/0.14/0.01 | resampled: KL 0.558 out 0.157 query p 0.302
+  L1H3 attn q/sym/lab/self 0.02/0.94/0.04/0.00 | resampled: KL 0.615 out 0.204 query p 0.275
+
+=== gen 5 (results/v2/ext_real10/gen5.pt) | intact acc 0.999
+  resample one head [layer x head]: [[0.999, 0.354, 0.999, 0.999], [0.998, 0.817, 0.993, 0.802]]
+  zero one head     [layer x head]: [[0.999, 0.32, 0.999, 1.0], [0.999, 0.984, 0.975, 0.964]]
+  resample whole layer: [0.306, 0.132]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[0.999, 0.999, 0.999], [0.999, 0.902, 0.999], [0.999, 0.999, 0.999], [0.999, 0.999, 0.999]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[0.999, 0.999, 0.999], [1.0, 0.398, 0.925], [1.0, 0.999, 0.999], [1.0, 0.999, 0.999]]
+  choice intact: kl 0.2699, mass_out 0.1019, query_prob 0.3279, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.94/0.03/0.01 | resampled: KL 0.726 out 0.228 query p 0.269
+  L0H1 attn q/sym/lab/self 0.02/0.92/0.04/0.02 | resampled: KL 0.695 out 0.240 query p 0.273
+  L0H2 attn q/sym/lab/self 0.01/0.96/0.02/0.01 | resampled: KL 0.601 out 0.200 query p 0.282
+  L0H3 attn q/sym/lab/self 0.02/0.94/0.03/0.01 | resampled: KL 0.686 out 0.223 query p 0.277
+  L1H0 attn q/sym/lab/self 0.03/0.81/0.16/0.00 | resampled: KL 0.544 out 0.142 query p 0.310
+  L1H1 attn q/sym/lab/self 0.02/0.90/0.07/0.00 | resampled: KL 0.473 out 0.163 query p 0.301
+  L1H2 attn q/sym/lab/self 0.01/0.82/0.16/0.01 | resampled: KL 0.435 out 0.132 query p 0.313
+  L1H3 attn q/sym/lab/self 0.00/0.89/0.11/0.00 | resampled: KL 0.321 out 0.114 query p 0.324
+
+=== gen 6 (results/v2/ext_real10/gen6.pt) | intact acc 1.000
+  resample one head [layer x head]: [[0.941, 1.0, 0.952, 0.999], [0.989, 0.985, 1.0, 0.805]]
+  zero one head     [layer x head]: [[0.998, 1.0, 0.998, 1.0], [1.0, 1.0, 1.0, 0.999]]
+  resample whole layer: [0.375, 0.118]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[1.0, 0.998, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[1.0, 0.943, 1.0], [1.0, 1.0, 1.0], [1.0, 0.953, 1.0], [1.0, 0.998, 1.0]]
+  choice intact: kl 0.2976, mass_out 0.1101, query_prob 0.3258, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.02/0.93/0.04/0.02 | resampled: KL 0.628 out 0.211 query p 0.285
+  L0H1 attn q/sym/lab/self 0.02/0.94/0.03/0.01 | resampled: KL 0.661 out 0.254 query p 0.263
+  L0H2 attn q/sym/lab/self 0.01/0.95/0.03/0.01 | resampled: KL 0.559 out 0.187 query p 0.294
+  L0H3 attn q/sym/lab/self 0.02/0.93/0.03/0.01 | resampled: KL 0.498 out 0.164 query p 0.297
+  L1H0 attn q/sym/lab/self 0.03/0.90/0.07/0.00 | resampled: KL 0.551 out 0.151 query p 0.305
+  L1H1 attn q/sym/lab/self 0.03/0.91/0.06/0.00 | resampled: KL 0.535 out 0.155 query p 0.304
+  L1H2 attn q/sym/lab/self 0.03/0.90/0.07/0.00 | resampled: KL 0.558 out 0.177 query p 0.290
+  L1H3 attn q/sym/lab/self 0.03/0.93/0.03/0.00 | resampled: KL 0.608 out 0.166 query p 0.296
+
+=== gen 7 (results/v2/ext_real10/gen7.pt) | intact acc 0.998
+  resample one head [layer x head]: [[0.558, 0.994, 0.996, 0.998], [0.998, 0.936, 0.893, 0.962]]
+  zero one head     [layer x head]: [[0.775, 0.998, 0.998, 0.998], [0.998, 0.995, 0.992, 0.984]]
+  resample whole layer: [0.35, 0.117]
+  path patch L0 head -> L1, direct [head x (q,k,v)]: [[0.998, 0.984, 0.998], [0.998, 0.998, 0.998], [0.998, 0.998, 0.998], [0.998, 0.998, 0.998]]
+  path patch L0 head -> L1, incl. via MLP0 [head x (q,k,v)]: [[0.998, 0.568, 0.998], [0.998, 0.994, 0.998], [0.997, 0.998, 0.997], [0.997, 0.998, 0.998]]
+  choice intact: kl 0.2980, mass_out 0.1177, query_prob 0.3284, query_true 0.3417
+  L0H0 attn q/sym/lab/self 0.01/0.93/0.03/0.03 | resampled: KL 0.513 out 0.200 query p 0.295
+  L0H1 attn q/sym/lab/self 0.03/0.93/0.03/0.01 | resampled: KL 0.448 out 0.169 query p 0.299
+  L0H2 attn q/sym/lab/self 0.02/0.92/0.05/0.01 | resampled: KL 0.589 out 0.230 query p 0.278
+  L0H3 attn q/sym/lab/self 0.02/0.89/0.08/0.02 | resampled: KL 0.512 out 0.198 query p 0.288
+  L1H0 attn q/sym/lab/self 0.03/0.93/0.03/0.01 | resampled: KL 0.594 out 0.174 query p 0.299
+  L1H1 attn q/sym/lab/self 0.04/0.94/0.02/0.00 | resampled: KL 0.630 out 0.186 query p 0.293
+  L1H2 attn q/sym/lab/self 0.02/0.92/0.06/0.00 | resampled: KL 0.636 out 0.183 query p 0.296
+  L1H3 attn q/sym/lab/self 0.02/0.94/0.04/0.00 | resampled: KL 0.558 out 0.187 query p 0.296
+
+saved results/v2/ext_real10/mechanism.json
