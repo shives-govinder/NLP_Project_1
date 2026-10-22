@@ -47,7 +47,9 @@ class Config:
     collapse_temperature: float = 1.0   # sampling temperature for generated data (<= 0 means argmax)
     dataset_size: int = 200_000         # sequences per generation (base and extended)
     real_frac: float = 0.0              # share of each later generation's data kept from the real data
-    ext_targets: str = "all"            # extended targets: "all", "query+symbol" or "query"
+    ext_targets: str = "all"            # extended targets: "all", "query+symbol", "query" or "full"
+    gen_context: bool = False           # extended: the model also writes the context and query
+    accumulate: bool = False            # train on all data so far (real + every generation), not just the last
 
     # ---- derived -----------------------------------------------------
     @property

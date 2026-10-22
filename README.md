@@ -38,9 +38,12 @@ All commands run from the repo root.
 | Causal circuit tests per generation (resample ablation, path patching) | `python scripts/mechanism.py results/v2/ext_t1` |
 | Data interventions on one generation's data (deletion, training targets) | `python scripts/formation.py --data results/v2/ext_t1/data_gen7.pt --delete errors --out results/v2/formation/gen7_del_errors.json` (see the script's docstring for all six runs) |
 | Figures for the abstract | `python scripts/paper_figures.py` |
+| Embedding geometry and attention maps across generations | `python scripts/embeddings.py results/v2/ext_t1 --compare results/v2/ext_t07 results/v2/base` |
+| Final train accuracy per generation, from saved models and data (no retraining) | `python scripts/train_accuracy.py results/v2/base results/v2/ext_t1` |
+| Hyper-parameter sweep, base variant (validation only) | `python scripts/sweep.py --variant base --lrs 0.0003 0.001 0.003 --d_models 64 --steps 25000 --out results/sweep/sweep_base.json` |
 | Log to Weights & Biases | add `--wandb` to `src.train` (install `wandb` first) |
 
-`--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU (CUDA is picked automatically when present). On a CPU, `--threads 4`–`8` is usually faster than using every core.
+`--device mps` uses the GPU on Apple Silicon Macs; use `cuda` on an NVIDIA machine, or leave it out to use the CPU (CUDA is picked automatically when present). On a CPU, `--threads 4`â€“`8` is usually faster than using every core.
 
 ### Reading the numbers: the no-induction ceiling
 
@@ -71,22 +74,24 @@ scripts/analyse.py   induction scores, ablations and attention heatmaps for a sa
 scripts/analyse_generations.py  circuit metrics and figures across collapse generations
 scripts/mechanism.py causal circuit tests for every generation of a run
 scripts/formation.py data interventions: deleting rows, dropping training targets
+scripts/embeddings.py embedding geometry and attention maps across generations
+scripts/train_accuracy.py final train accuracy per generation from saved models and data
 scripts/sweep.py     hyper-parameter sweep (extended variant, validation only)
 scripts/collapse_figures.py, scripts/paper_figures.py  figures
 scripts/cluster/     SLURM job script
-results/             outputs (git-ignored)
+results/             outputs (git-ignored, except the v2 JSON summaries, logs and figures)
 ```
 
 **Data splits:** the data is generated on the fly. Training draws fresh samples, and validation and test use fixed, different seeds (`VAL_SEED`, `TEST_SEED` in `src/train.py`). Explain this in the write-up, because the brief requires a train, validation and test split.
 
 ## Roadmap (maps to the brief's steps)
 
-- [ ] **1. Reproduce the base task.** Get `smoke_test.py` passing, then do a full `src.train` run. Save the loss curve and look for the phase change.
-- [ ] **1b. Tune hyper-parameters.** The brief deducts marks if you don't tune at all. Sweep `lr`, `d_model` and `steps` on validation, and keep test for the end.
+- [x] **1. Reproduce the base task.** Get `smoke_test.py` passing, then do a full `src.train` run. Save the loss curve and look for the phase change.
+- [x] **1b. Tune hyper-parameters.** The brief deducts marks if you don't tune at all. Sweep `lr`, `d_model` and `steps` on validation, and keep test for the end.
 - [x] **2a. Base collapse.** Done (v2, recursive). No collapse: see CONTEXT.md, v2 finding A.
-- [x] **2b. Extended collapse.** Done (v2): T = 1 with two seeds, T = 0.7, 10% real data. See CONTEXT.md, v2 findings B–E.
-- [ ] **3. Metrics over training.** Track train and validation loss and accuracy, final test accuracy, perplexity and output entropy across generations.
-- [ ] **4. Interpretability.** Use `induction_score` and `ablation_grid` from `src/interpret.py` to find the previous-token and induction heads, then see how they degrade across generations. For more depth, see Conmy et al. (2023) and Chen et al. (2026).
+- [x] **2b. Extended collapse.** Done (v2): T = 1 with two seeds, T = 0.7, 10% real data. See CONTEXT.md, v2 findings Bâ€“E.
+- [x] **3. Metrics over training.** Track train and validation loss and accuracy, final test accuracy, perplexity and output entropy across generations.
+- [x] **4. Interpretability.** Use `induction_score` and `ablation_grid` from `src/interpret.py` to find the previous-token and induction heads, then see how they degrade across generations. For more depth, see Conmy et al. (2023) and Chen et al. (2026).
 - [ ] **5. Extended abstract.** Two pages on the Moodle template, plus the NeurIPS ethics checklist and the Faculty AI ethics statement.
 
 ## References

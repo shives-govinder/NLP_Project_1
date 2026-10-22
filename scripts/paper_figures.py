@@ -12,6 +12,11 @@ fig_interventions.png
                   induction circuit forms under each training target, and
                   (c) which path carries the previous-token head's effect
                   (scripts/mechanism.py), across all 38 models.
+fig_training.png  training dynamics from each run's train_history: (a) the
+                  phase change in every generation of the base and extended
+                  chains against the no-induction ceiling, (b) the training-loss
+                  floor of the first and last generations, (c) the final
+                  training loss of every generation of each extended chain.
 
 Needs results/v2/choice_profiles.json (computed from every gen*.pt with
 src.patching.choice_profile; see compute_profiles below).
@@ -95,25 +100,33 @@ def place_end_labels(ax, min_gap=0.045):
                     textcoords="offset points", fontsize=7, color=INK_2, va="center")
 
 
-def fig_collapse(profiles, out):
-    import matplotlib.pyplot as plt
-
-    fig, axes = plt.subplots(2, 2, figsize=(9, 6.4), facecolor=SURFACE)
-    (a, b), (c, d) = axes
+def collapse_panels(profiles, a=None, b=None, c=None, d=None, letters="abcd"):
+    """Leakage (a), misallocation (b), sharpening (c) by generation and lost tails (d);
+    any axis can be None to leave that panel out."""
     for i, (run, label) in enumerate(CHAINS):
         rows = profiles[run]
         g = [r["gen"] for r in rows]
-        line(a, g, [r["mass_out"] for r in rows], i, label)
-        line(b, g, [r["kl_in"] for r in rows], i, label)
-        line(c, g, [r["slope"] for r in rows], i, label)
+        for ax, key in ((a, "mass_out"), (b, "kl_in"), (c, "slope")):
+            if ax is not None:
+                line(ax, g, [r[key] for r in rows], i, label)
 
-    style(a, "(a) Probability on symbols not in the context", "probability (real: 0)")
-    a.set_ylim(bottom=0)
-    style(b, "(b) Probability misallocated among context symbols", "KL within context (nats, log scale)")
-    b.set_yscale("log")
-    style(c, "(c) Frequency sharpening", "slope of model on true choice probability")
-    c.axhline(1, color=INK_2, linewidth=1, linestyle="--")
-    c.text(3.5, 0.985, "1 = copies frequencies exactly", color=INK_2, fontsize=7, va="top", ha="center")
+    if a is not None:
+        style(a, f"({letters[0]}) Leakage out of the context", "probability on absent symbols (real: 0)")
+        a.set_ylim(bottom=0)
+    if b is not None:
+        style(b, f"({letters[1]}) Misallocation within the context", "KL within context (nats, log scale)")
+        b.set_yscale("log")
+    if c is not None:
+        style(c, f"({letters[2]}) Frequency sharpening", "slope, model on true probability")
+        c.axhline(1, color=INK_2, linewidth=1, linestyle="--")
+        c.text(3.5, 0.985, "1 = copies frequencies exactly", color=INK_2, fontsize=7, va="top", ha="center")
+        c.set_ylim(0.9, None)
+    for ax in (a, b, c):
+        if ax is not None:
+            ax.set_xticks(range(0, 8))
+            ax.margins(x=0.22)
+    if d is None:
+        return
 
     # (d) choice probability by slot count: real data, gen 0, and gen 7 of two chains
     counts = [1, 2, 3, 4, 5]
@@ -124,17 +137,18 @@ def fig_collapse(profiles, out):
         last = profiles[run][-1]
         line(d, counts, [last["by_count"][str(k)] if str(k) in last["by_count"] else last["by_count"][k]
                          for k in counts], i, f"{label}, gen {last['gen']}")
-    style(d, "(d) Lost tails: choice probability by slot count", "mean choice probability", "slots the symbol fills (of 8)")
+    style(d, f"({letters[3]}) Lost tails (generation 7)", "mean choice probability", "slots the symbol fills (of 8)")
     d.set_xticks(counts)
     d.set_ylim(0, 1)
-
-    for ax in (a, b, c):
-        ax.set_xticks(range(0, 8))
-        ax.margins(x=0.22)
     d.margins(x=0.25)
-    a.legend(frameon=False, fontsize=7.5, labelcolor=INK_2, loc="upper left")
-    c.set_ylim(0.9, None)
-    for ax in axes.flat:
+
+
+def fig_collapse(profiles, out):
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(1, 4, figsize=(13, 3.1), facecolor=SURFACE)
+    collapse_panels(profiles, *axes)      # lines are direct-labelled at their ends, so no legend
+    for ax in axes:
         place_end_labels(ax)
     fig.tight_layout()
     fig.savefig(out, dpi=250, facecolor=SURFACE)
@@ -152,16 +166,22 @@ def strip(ax, x, ys, color, marker="o", width=0.22):
     ax.plot([x - 0.3, x + 0.3], [statistics.median(ys)] * 2, color=INK, linewidth=1.5)
 
 
-def fig_interventions(out):
-    import matplotlib.pyplot as plt
-
+def intervention_panels(a=None, b=None, c=None, letters="abc"):
+    """Deletion test (a), phase change by training target (b) and path shares (c);
+    any axis can be None to leave that panel out."""
     def runs(name):
         with open(f"{ROOT}/formation/{name}.json") as f:
             return json.load(f)["runs"]
 
-    fig, (a, b, c) = plt.subplots(1, 3, figsize=(10.5, 3.4), facecolor=SURFACE,
-                                  gridspec_kw={"width_ratios": [1.35, 1, 1.15]})
+    if a is not None:
+        deletion_panel(a, runs, letters[0])
+    if b is not None:
+        formation_panel(b, runs, letters[1])
+    if c is not None:
+        path_panel(c, letters[2])
 
+
+def deletion_panel(a, runs, letter):
     # (a) deletion: leakage and within-context misallocation, 3 seeds each
     conds = [("real", "real data"), ("gen7", "gen-7 data"), ("gen7_del_errors", "erroneous\nrows deleted"),
              ("gen7_del_random", "random rows\ndeleted")]
@@ -174,9 +194,11 @@ def fig_interventions(out):
     a.set_xticks(range(len(conds)))
     a.set_xticklabels([l for _, l in conds], fontsize=7.5)
     a.set_ylim(0, 0.55)
-    style(a, "(a) Deleting the erroneous synthetic rows", "KL on real data (nats)", "")
+    style(a, f"({letter}) Deleting the erroneous synthetic rows", "KL on real data (nats)", "")
     a.legend(frameon=False, fontsize=7, labelcolor=INK_2, loc="upper left")
 
+
+def formation_panel(b, runs, letter):
     # (b) phase-change step under each training target (real data)
     targets = [("targets_query", "query label\nonly"), ("targets_qsym", "+ next\nsymbol"), ("real", "+ next label\n(all)")]
     for i, (name, _) in enumerate(targets):
@@ -184,8 +206,10 @@ def fig_interventions(out):
     b.set_xticks(range(len(targets)))
     b.set_xticklabels([l for _, l in targets], fontsize=7.5)
     b.set_ylim(0, 8500)
-    style(b, "(b) When induction forms", "phase-change step", "training targets")
+    style(b, f"({letter}) When induction forms", "phase-change step", "training targets")
 
+
+def path_panel(c, letter):
     # (c) share of the top layer-0 head's damage carried by each path into layer 1
     shares = {k: [] for k in ("k", "kd", "q", "v")}
     for run in ("base", "ext_t1", "ext_t1_s100", "ext_real10", "ext_t07"):
@@ -207,8 +231,94 @@ def fig_interventions(out):
     c.set_xticks(range(len(paths)))
     c.set_xticklabels([l for _, l in paths], fontsize=7.5)
     c.set_ylim(-0.05, 1.15)
-    style(c, "(c) Where the previous-token head acts",
+    style(c, f"({letter}) Where the previous-token head acts",
           f"share of the head's effect ({len(shares['k'])} models)", "layer-1 input the head reaches")
+
+
+def fig_interventions(out):
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.4), facecolor=SURFACE,
+                             gridspec_kw={"width_ratios": [1.35, 1, 1.15]})
+    intervention_panels(*axes)
+    fig.tight_layout()
+    fig.savefig(out, dpi=250, facecolor=SURFACE)
+    plt.close(fig)
+
+
+def fig_main(profiles, out):
+    """The abstract's one in-page figure: leakage and misallocation by generation,
+    the deletion test and the path-patching shares."""
+    import matplotlib.pyplot as plt
+
+    fig, (a, b, c, d) = plt.subplots(1, 4, figsize=(14, 3.2), facecolor=SURFACE,
+                                     gridspec_kw={"width_ratios": [1, 1, 1.25, 1.1]})
+    collapse_panels(profiles, a, b, letters="ab")
+    intervention_panels(a=c, c=d, letters="c d")
+    for ax in (a, b):
+        place_end_labels(ax)
+    # shorter titles and ticks to fit four panels in one row
+    c.set_title("(c) Deleting the erroneous rows", color=INK, fontsize=9.5, loc="left")
+    c.set_xticklabels(["real\ndata", "gen-7\ndata", "erroneous\ndeleted", "random\ndeleted"], fontsize=7.5)
+    d.set_title("(d) Paths of the previous-token head", color=INK, fontsize=9.5, loc="left")
+    fig.tight_layout()
+    fig.savefig(out, dpi=250, facecolor=SURFACE)
+    plt.close(fig)
+
+
+CEILING = 0.523   # best query accuracy without induction for n_pairs 8, n_unique 4 (README)
+
+
+def fig_training(out):
+    import matplotlib.pyplot as plt
+
+    def gens(run):
+        with open(f"{ROOT}/{run}/collapse.json") as f:
+            return json.load(f)["generations"]
+
+    fig, (a, b, c) = plt.subplots(1, 3, figsize=(10.5, 3.3), facecolor=SURFACE)
+
+    # (a) validation accuracy (query label, real data) against step, every generation;
+    # later generations are drawn darker
+    for color, run, name in ((INK_2, "base", "base"), (SERIES[0], "ext_t1", "extended, T = 1")):
+        gs = gens(run)
+        for g in gs:
+            h = [r for r in g["train_history"] if r["step"] > 0]      # log axis
+            a.plot([r["step"] for r in h], [r["val_acc"] for r in h], color=color, linewidth=1.1,
+                   alpha=0.35 + 0.65 * g["gen"] / max(len(gs) - 1, 1),
+                   label=f"{name}, gens 0-{len(gs) - 1}" if g["gen"] == 0 else None)
+    a.axhline(CEILING, color=INK_2, linewidth=1, linestyle="--")
+    a.text(260, CEILING + 0.02, "no-induction ceiling", color=INK_2, fontsize=7, va="bottom")
+    a.axhline(0.125, color=INK_2, linewidth=0.8, linestyle=":")
+    a.text(260, 0.125 + 0.02, "chance", color=INK_2, fontsize=7, va="bottom")
+    a.set_xscale("log")
+    a.set_ylim(0, 1.03)
+    style(a, "(a) Phase change in every generation", "validation accuracy (real data)",
+          "training step (log scale)")
+    a.legend(frameon=False, fontsize=7, labelcolor=INK_2, loc="lower right", bbox_to_anchor=(1, 0.2))
+
+    # (b) training loss (all supervised targets) of the first and last generation
+    for i, run, label in ((0, "ext_t1", "T = 1"), (3, "ext_t07", "T = 0.7")):
+        gs = gens(run)
+        for g, ls in ((gs[0], ":"), (gs[-1], "-")):
+            if run == "ext_t07" and g["gen"] == 0:      # same generation-0 model as ext_t1
+                continue
+            h = g["train_history"]
+            b.plot([r["step"] for r in h], [r["train_loss"] for r in h], color=SERIES[i] if g["gen"] else INK_2,
+                   linewidth=1.3, linestyle=ls, label=f"gen {g['gen']}" + ("" if g["gen"] == 0 else f", {label}"))
+    b.set_yscale("log")
+    style(b, "(b) Training loss, first and last generation", "training loss (nats, log scale)", "training step")
+    b.legend(frameon=False, fontsize=7, labelcolor=INK_2, loc="upper right")
+
+    # (c) final training loss per generation: the floor set by the free next-symbol choice
+    for i, (run, label) in enumerate(CHAINS):
+        gs = gens(run)
+        line(c, [g["gen"] for g in gs], [g["train_history"][-1]["train_loss"] for g in gs], i, label)
+    style(c, "(c) Loss floor of the generated data", "final training loss (nats)")
+    c.set_xticks(range(0, 8))
+    c.margins(x=0.22)
+    c.set_ylim(0, None)
+    place_end_labels(c)
 
     fig.tight_layout()
     fig.savefig(out, dpi=250, facecolor=SURFACE)
@@ -227,6 +337,10 @@ def main():
     print(f"saved {ROOT}/figures/fig_collapse.png")
     fig_interventions(f"{ROOT}/figures/fig_interventions.png")
     print(f"saved {ROOT}/figures/fig_interventions.png")
+    fig_main(profiles, f"{ROOT}/figures/fig_main.png")
+    print(f"saved {ROOT}/figures/fig_main.png")
+    fig_training(f"{ROOT}/figures/fig_training.png")
+    print(f"saved {ROOT}/figures/fig_training.png")
 
 
 if __name__ == "__main__":

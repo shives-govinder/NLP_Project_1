@@ -2,7 +2,7 @@
 
 This file is the running record of where Project 1 stands: what has been built and found, the decisions behind it, and what's left to do. Read it before picking up work, and update it when something changes. The README covers setup and commands; this file covers everything else.
 
-*Last updated: 7 Oct 2026 (v2 experiments: recursive base variant, real-data evaluation, causal circuit tests, data interventions). The v2 findings below are the ones to write up; findings 1–8 are the earlier (v1) record.*
+*Last updated: 19 Oct 2026 (abstract drafted in `paper/`, fitting the 2-page limit; train accuracy logged; training-dynamics and main figures; embedding analysis script; base-variant sweep; README.txt). The v2 findings below are the ones to write up; findings 1–8 are the earlier (v1) record.*
 
 ## Deadlines and deliverables
 
@@ -16,13 +16,16 @@ This file is the running record of where Project 1 stands: what has been built a
 
 - [x] Full code implementation (this repo)
 - [ ] `requirements.txt`: final check (currently torch, numpy, pyyaml, matplotlib, tqdm)
-- [ ] **`README.txt`** (the brief asks for `.txt`): how to install and reproduce every result, with the final commands
+- [x] **`README.txt`** (the brief asks for `.txt`): how to install and reproduce every result, with the final commands
 - [ ] Final test: fresh clone → install → `python scripts/smoke_test.py` passes
 
 **Extended abstract (PDF)**
 
-- [ ] Uploaded to Overleaf: `_NLP_2026__Extended_Abstract_Template.zip` → New Project → Upload Project (as instructed on Moodle). Write in `ccn_style.tex`, add references to `ccn_style.bib`, replace the placeholder `images/image.jpeg`.
-- [ ] Report figures (about 3), built from `results/`, uploaded to `images/`
+- [ ] Uploaded to Overleaf (draft is in `paper/`: `ccn_style.tex`, `ccn_style.bib`, `images/`; upload that folder): `_NLP_2026__Extended_Abstract_Template.zip` → New Project → Upload Project (as instructed on Moodle). Write in `ccn_style.tex`, add references to `ccn_style.bib`, replace the placeholder `images/image.jpeg`.
+- [x] Report figures: `fig_main.png` in the page limit; `fig_training`, `fig_collapse`, `fig_interventions` in the supplement (all from `python scripts/paper_figures.py`)
+- [x] Embedding figure (done 20 Oct): copy the cluster checkpoints into `results/v2/`, run `python scripts/embeddings.py results/v2/ext_t1 --compare results/v2/ext_t07 results/v2/base`, copy `fig_embeddings.png` into `paper/images/`, and write its caption
+- [x] Train accuracy for the v2 runs (done 20 Oct; Table tab:train in the supplement) (they predate its logging): with the checkpoints in place, run `python scripts/train_accuracy.py results/v2/base results/v2/ext_t1 results/v2/ext_t1_s100 results/v2/ext_t07 results/v2/ext_real10`; no retraining needed. Put the table in the supplement.
+- [x] Base-variant sweep (Methods now says the sweep was on the extended variant and cites the lr 3e-4 base run) (`results/sweep/sweep_base.json`): add one clause to Methods (TODO in `ccn_style.tex`)
 - [ ] Title, authors (all 3), abstract (about 20 lines) and 3 keywords
 - [ ] Introduction with background, methods, results, discussion: **strictly 2 pages** including figures and tables
 - [ ] Figure and table captions that tell the reader what to look at; every figure referenced in the text
@@ -33,7 +36,7 @@ This file is the running record of where Project 1 stands: what has been built a
 
 **Appended after the references, before any supplementary material**
 
-- [ ] **NeurIPS 2024 checklist: `.tex` NOT yet available on Moodle.** Without it the project isn't marked. Keep checking Moodle, and ask the lecturer or tutor if it hasn't appeared by about 13 Oct. Fallback (only if the lecturer allows): the public checklist from the official NeurIPS 2024 style files.
+- [x] **NeurIPS 2024 checklist (filled 20 Oct, `paper/neurips_checklist.tex`; was not on Moodle earlier).** Without it the project isn't marked. Keep checking Moodle, and ask the lecturer or tutor if it hasn't appeared by about 13 Oct. Fallback (only if the lecturer allows): the public checklist from the official NeurIPS 2024 style files.
 - [ ] **Wits Science Faculty AI Ethics Form:** Shives has it and will add it manually.
 
 **Admin**
@@ -58,6 +61,17 @@ The brief asks how **model collapse** affects **in-context learning and inductio
   - `--n_unique 4`: each sequence uses only 4 distinct symbols across its 8 pairs, so symbols repeat, always with the same label.
   - `--dense_loss`: the model is graded on every repeated symbol's label, not just the final query. That gives about 5.6 copying targets per sequence instead of 1.
 - **Data splits:** training data is generated fresh at every step. Validation and test sets are fixed and generated with their own seeds (`VAL_SEED`, `TEST_SEED` in `src/train.py`). Explain this in the method section.
+
+## Revision after review (21–22 Oct)
+
+A reviewer's critique led to new analyses and five new chains. All the chains ran on mscluster under `jpatel` (`~/nlp1`, venv at `~/nlp1/.venv`, jobs in `scripts/cluster/revision*.sbatch`). Checkpoints stay on the cluster; JSON results were copied to `results/v2/` (`*_revision.json` = new chains only). The paper now reports:
+
+- **The choice runs outside the circuit** (`scripts/choice_circuit.py`). The previous-token head's key path carries ~99% of its effect on the query label but changes the next-symbol KL by ≤0.06 nats (64 real-context models); ≤0.19 in the generated-context chain. The induction head matters no more for the choice than other layer-1 heads.
+- **T = 0.7 is mostly sampling arithmetic** (`scripts/sampling_null.py`). A perfect learner, p_g ∝ p_0^((1/T)^g), matches the chain through generation 4; afterwards the learner collapses *less* than the null. Two seeds.
+- **Budget ablation (`ext_long`, 25k steps per generation).** Leakage halves (δ 0.009 vs 0.019), but misallocation grows faster (0.578 vs 0.398 at generation 7). So collapse is not just underfitting.
+- **Generated contexts (`ext_genctx`, `--gen_context`).** Pairing and copying stay intact (≥99.5%, real query accuracy ≥0.9997); the context-symbol choice, the query choice and the next-symbol choice drift.
+- **Accumulation (`ext_accum`, `--accumulate`).** Leakage reaches only 5.7%; misallocation stays at the generation-0 level (Gerstgrasser et al.).
+- **Second seeds** for T = 0.7 and for 10% real data replicate.
 
 ## v2 findings (7 Oct): what to write up
 
@@ -114,7 +128,7 @@ Total KL at generation 7 is 0.296 vs 0.558 without real data. Misallocation leve
 
 ### F. Induction formation (3 seeds each; phase change = first eval with validation accuracy ≥ 0.9, resolution 250 steps)
 
-- Collapsed data does not change *when* induction forms: generation-7 data 1,000–1,250 steps vs real data 750–1,750.
+- Collapsed data does not change *when* induction forms: generation-7 data 750–1,250 steps vs real data 750–1,750.
 - **The next-symbol target is what makes induction form fast.** Query-label target only: 6,250–7,750 steps; adding the next-symbol target: 750–1,000; adding the next-label target as well: 750–1,750. No overlap. This explains why the extended variant always formed induction ~7× sooner than the base variant. (A Chen-style "catalyst", but from the training objective rather than data content.)
 
 ### G. The circuit, with causal tests (Conmy et al. 2023 style; `scripts/mechanism.py`, all 38 models)
@@ -122,7 +136,7 @@ Total KL at generation 7 is 0.296 vs 0.558 without real data. Misallocation leve
 Interventions use **resample ablation** (a head's output replaced by its output on another sequence) instead of zero ablation, and **path patching** (changing only what layer 1 reads as queries, keys or values).
 
 - **The circuit is essential in every generation of every chain:** resampling all of layer 1 gives 0.117–0.132 accuracy (chance 0.125); resampling all of layer 0 gives 0.28–0.41.
-- **It is K-composition, as in Singh et al., but relayed by the layer-0 MLP.** In the 33/38 models where one layer-0 head matters (resampled accuracy ≤ 0.88), the path into layer 1's *keys*, including the route through the layer-0 MLP, carries a median **99%** of that head's effect (range 93–107%). The direct key edge alone carries a median **10%**. Queries carry nothing; values at most 12%. Singh et al.'s figure shows an attention-only path; here the MLP sits in the middle.
+- **It is K-composition, as in Singh et al., but relayed by the layer-0 MLP.** In the 33/38 models where one layer-0 head matters (resampled accuracy < 0.9; 32 at ≤ 0.88), the path into layer 1's *keys*, including the route through the layer-0 MLP, carries a median **99%** of that head's effect (range 93–107%). The direct key edge alone carries a median **10%**. Queries carry nothing; values at most 12%. Singh et al.'s figure shows an attention-only path; here the MLP sits in the middle.
 - **Zero ablation understates induction heads here.** The most important single layer-1 head: median accuracy 0.68 when resampled vs 0.98 when zeroed. The v1 claim "induction is spread across several heads" (finding 3) rests on zero ablation; under resample ablation several models have one head that alone drops accuracy to 0.12–0.14. Report both and say why they differ (zeroing removes a head's vote; resampling makes it vote for a wrong label).
 - **Collapse does not damage the circuit.** Resampling layer 1 gives chance in every generation of every chain. The only trend that appears in both T = 1 chains is a weak *fall* in accuracy when all of layer 0 is resampled (r = −0.55 and −0.66 with generation, 8 models each; not significant at that size), i.e. layer 0 becomes, if anything, slightly *more* essential. That matches v1's weak "more essential" trend (finding 7); report it as weak, not as a result.
 

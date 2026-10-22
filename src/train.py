@@ -97,11 +97,14 @@ def train_model(
                 logits = model(seq)
                 loss = dense_loss(logits, extended_targets(
                     seq, cfg.n_pairs, context_targets=cfg.dense_loss, targets=cfg.ext_targets))
+                q = 2 * cfg.n_pairs   # query symbol; its label is the next token
+                q_logits, q_tgt = logits[:, q], seq[:, q + 1]
             else:
                 # base: [context, query, query label]; the label is the target, not an input
                 ctx, lq = seq[:, :-1], seq[:, -1]
                 logits = model(ctx)
                 loss = dense_loss(logits, dense_targets(ctx, lq)) if cfg.dense_loss else query_loss(logits, lq)
+                q_logits, q_tgt = logits[:, -1], lq
         else:
             seq, tgt = make_icl_batch(
                 cfg.batch_size, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
@@ -112,15 +115,19 @@ def train_model(
                 loss = dense_loss(logits, dense_targets(seq, tgt))
             else:
                 loss = query_loss(logits, tgt)
+            q_logits, q_tgt = logits[:, -1], tgt
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()
 
         if step % cfg.eval_every == 0:
             val = evaluate(model, cfg, val_set)
-            rec = {"step": step, "train_loss": float(loss.item()), **{f"val_{k}": v for k, v in val.items()}}
+            # train accuracy: query-label accuracy on this step's training batch (same metric as val)
+            train_acc = float((q_logits.argmax(-1) == q_tgt).float().mean().item())
+            rec = {"step": step, "train_loss": float(loss.item()), "train_acc": train_acc,
+                   **{f"val_{k}": v for k, v in val.items()}}
             history.append(rec)
-            log(f"step {step:5d} | train loss {loss.item():.4f} | "
+            log(f"step {step:5d} | train loss {loss.item():.4f} | train acc {train_acc:.3f} | "
                 f"val acc {val['acc']:.3f} | val loss {val['loss']:.4f} | val ppl {val['ppl']:.2f}")
             if wandb_run is not None:
                 wandb_run.log(rec)

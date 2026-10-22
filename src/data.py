@@ -205,11 +205,16 @@ def extended_targets(
     recursion they are whatever the previous generation generated). With
     ``context_targets`` the context also gets the dense induction targets.
     ``targets`` drops continuation targets for ablations: "query+symbol" leaves
-    out l_next, "query" also leaves out s_next.
+    out l_next, "query" also leaves out s_next. "full" is a plain language-model
+    loss on every next token, context symbols and first-seen labels included,
+    so the model learns to write whole sequences (the generated-context chain).
     """
     B, T = seq.shape
     q = 2 * n_pairs                                   # query position
     tgt = torch.full((B, T), ignore_index, dtype=torch.long, device=seq.device)
+    if targets == "full":
+        tgt[:, :-1] = seq[:, 1:]
+        return tgt
     if context_targets:
         tgt[:, : q + 1] = dense_targets(seq[:, : q + 1], seq[:, q + 1], ignore_index)
     else:
