@@ -7,6 +7,7 @@ further (e.g. following Conmy et al., 2023 for automated circuit discovery).
 """
 from __future__ import annotations
 
+import math
 from typing import Dict, List, Tuple
 
 import torch
@@ -211,4 +212,40 @@ def circuit_summary(model, cfg: Config, batches, head_threshold: float = 0.8) ->
         "acc_without_prev_head": float(grid[0, prev_head]),
         "acc_without_last_layer": masked_accuracy(model, cfg, mask_for({last: list(range(H))}), batches),
         "largest_single_head_drop": float(base_acc - grid.min()),
+    }
+
+
+@torch.no_grad()
+def embedding_geometry(model, cfg: Config) -> dict:
+    """How the token embedding (tied with the unembedding) lays out symbols and labels.
+
+    Symbols are tokens [0, n_symbols), labels [n_symbols, n_symbols + n_labels).
+    An identity lookup (find the earlier copy of the query symbol) works best when
+    symbols are near-orthogonal, so the mean |cos| among symbols (raw, and with the
+    mean symbol vector removed) is reported next to that of random vectors of the
+    same width (about sqrt(2 / (pi * d_model))).
+    """
+    W = model.tok_emb.weight.detach().float().cpu()
+    S, Lb = cfg.n_symbols, cfg.n_labels
+    sym, lab = W[:S], W[S:S + Lb]
+
+    def mean_abs_cos(X):
+        Xn = X / X.norm(dim=-1, keepdim=True)
+        off = ~torch.eye(len(X), dtype=torch.bool)
+        return float((Xn @ Xn.T)[off].abs().mean())
+
+    X = W[:S + Lb] - W[:S + Lb].mean(0)
+    _, sv, V = torch.linalg.svd(X, full_matrices=False)
+    return {
+        "sym_norm": sym.norm(dim=-1).tolist(),
+        "label_norm": lab.norm(dim=-1).tolist(),
+        "sym_abs_cos": mean_abs_cos(sym),
+        # with the shared "this is a symbol" direction removed: how distinct symbol identities are
+        "sym_abs_cos_centred": mean_abs_cos(sym - sym.mean(0)),
+        "label_abs_cos": mean_abs_cos(lab),
+        "random_abs_cos": (2 / (math.pi * W.shape[1])) ** 0.5,
+        # distance between the symbol and label centroids, in units of the mean norm
+        "centroid_gap": float((sym.mean(0) - lab.mean(0)).norm() / W[:S + Lb].norm(dim=-1).mean()),
+        "pca_var": (sv[:2] ** 2 / (sv ** 2).sum()).tolist(),
+        "pca": (X @ V[:2].T).tolist(),
     }

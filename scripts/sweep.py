@@ -1,6 +1,7 @@
-"""Hyper-parameter sweep on the extended variant's generation 0 (real data only).
+"""Hyper-parameter sweep on generation 0 (real data only) of either collapse variant.
 
     python scripts/sweep.py --device mps
+    python scripts/sweep.py --variant base --lrs 0.0003 0.001 0.003 --d_models 64 --steps 25000 --out results/sweep/sweep_base.json
     python scripts/sweep.py --device mps --lrs 0.0003 0.001 0.003 --d_models 32 64 128 --steps 8000
 
 For every (learning rate, d_model) pair it trains one model on real extended
@@ -8,7 +9,7 @@ data and records, using the VALIDATION set only (test is never touched):
 
   phase_step     first logged step with validation accuracy >= 0.9 (None = never)
   val_acc/loss   at the end of training
-  gen_out_ctx    share of generated next symbols NOT in the context, measured on
+  gen_out_ctx    (extended only) share of generated next symbols NOT in the context, measured on
                  a fresh sample written by the trained model. This is how far its
                  own generations drift from real data, and so how fast a collapse
                  chain started from it would drift. Lower is better.
@@ -24,7 +25,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.collapse import EXT_DATA_SEED, extended_stats, generate_extended_dataset, real_extended_dataset
+from src.collapse import EXT_DATA_SEED, extended_stats, generate_extended_dataset, real_dataset
 from src.config import Config
 from src.train import auto_device, train_model
 
@@ -38,6 +39,7 @@ def phase_step(history, threshold=0.9):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    p.add_argument("--variant", choices=["extended", "base"], default="extended")
     p.add_argument("--lrs", type=float, nargs="+", default=[3e-4, 1e-3, 3e-3])
     p.add_argument("--d_models", type=int, nargs="+", default=[32, 64, 128])
     p.add_argument("--steps", type=int, default=8000)
@@ -47,9 +49,9 @@ def main():
     p.add_argument("--out", type=str, default="results/sweep/sweep.json")
     args = p.parse_args()
 
-    base = Config(variant="extended", n_unique=4, dense_loss=True, steps=args.steps, seed=args.seed)
+    base = Config(variant=args.variant, n_unique=4, dense_loss=True, steps=args.steps, seed=args.seed)
     base.device = auto_device(args.device)
-    data = real_extended_dataset(base, EXT_DATA_SEED + args.seed)   # same training data for every config
+    data = real_dataset(base, EXT_DATA_SEED + args.seed)   # same training data for every config
 
     results = []
     if os.path.exists(args.out):                                    # resume: skip finished configs
@@ -64,16 +66,20 @@ def main():
             print(f"\n=== lr {lr:g}  d_model {d} ===")
             t0 = time.time()
             model, hist = train_model(cfg, dataset=data, log=lambda *a: None)
-            gen_cfg = dataclasses.replace(cfg, dataset_size=args.gen_samples)
-            st = extended_stats(generate_extended_dataset(model, gen_cfg, EXT_DATA_SEED + 999), gen_cfg)
             rec = {"lr": lr, "d_model": d, "params": model.num_params(),
                    "phase_step": phase_step(hist), "val_acc": hist[-1]["val_acc"],
-                   "val_loss": hist[-1]["val_loss"], "gen_out_ctx": 1 - st["next_symbol_in_context"],
-                   "gen_query_share": st["next_symbol_is_query"], "minutes": (time.time() - t0) / 60,
+                   "val_loss": hist[-1]["val_loss"], "gen_out_ctx": None, "gen_query_share": None,
                    "history": hist}
+            if args.variant == "extended":
+                gen_cfg = dataclasses.replace(cfg, dataset_size=args.gen_samples)
+                st = extended_stats(generate_extended_dataset(model, gen_cfg, EXT_DATA_SEED + 999), gen_cfg)
+                rec["gen_out_ctx"] = 1 - st["next_symbol_in_context"]
+                rec["gen_query_share"] = st["next_symbol_is_query"]
+            rec["minutes"] = (time.time() - t0) / 60
             results.append(rec)
             print(f"phase@{rec['phase_step']} | val acc {rec['val_acc']:.3f} | val loss {rec['val_loss']:.4f} "
-                  f"| generated not-in-context {100 * rec['gen_out_ctx']:.2f}% | {rec['minutes']:.1f} min")
+                  + (f"| generated not-in-context {100 * rec['gen_out_ctx']:.2f}% " if rec["gen_out_ctx"] is not None else "")
+                  + f"| {rec['minutes']:.1f} min")
             os.makedirs(os.path.dirname(args.out), exist_ok=True)
             json.dump(results, open(args.out, "w"), indent=2)          # save after every config
 
@@ -81,7 +87,7 @@ def main():
     for r in sorted(results, key=lambda r: (r["lr"], r["d_model"])):
         ph = "-" if r["phase_step"] is None else r["phase_step"]
         print(f"{r['lr']:>8g} {r['d_model']:>7} {r['params']:>8,} {ph:>7} {r['val_acc']:>8.3f} "
-              f"{r['val_loss']:>9.4f} {100 * r['gen_out_ctx']:>10.2f}%")
+              f"{r['val_loss']:>9.4f} " + ("-" if r["gen_out_ctx"] is None else f"{100 * r['gen_out_ctx']:.2f}%").rjust(11))
     print(f"\nsaved {args.out}")
 
 

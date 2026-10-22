@@ -1,0 +1,309 @@
+% Project 1 extended abstract (CCN two-page template from Moodle).
+% Every number in this file comes from results/v2 (collapse.json, mechanism.json,
+% choice_profiles.json, formation/*.json); see README.txt for the commands.
+
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{ccn}
+\usepackage{pslatex}
+\usepackage{apacite}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{natbib}
+\usepackage{float}
+
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{svg}
+\usepackage{pdfpages}
+\usepackage[labelfont=bf, margin=0.8cm, font=sf]{caption}
+
+% NeurIPS checklist answer macros (from neurips_2024.sty, which can't be loaded with ccn.sty)
+\newcommand{\answerYes}[1][]{\textcolor{blue}{[Yes] #1}}
+\newcommand{\answerNo}[1][]{\textcolor{orange}{[No] #1}}
+\newcommand{\answerNA}[1][]{\textcolor{gray}{[NA] #1}}
+
+\title{Collapse Without Circuit Damage: Recursive Training Corrupts\\a Choice Made Outside the Induction Circuit}
+
+% Authors in alphabetical order of surname; student numbers in brackets.
+\author{{\large \bf Shervaan Govinder (2556996)} \\ University of the Witwatersrand, 1 Jan Smuts Ave,\\ Braamfontein, Johannesburg, 2000, South Africa
+  \AND {\large \bf Jaishil Patel (2602867)} \\ University of the Witwatersrand, 1 Jan Smuts Ave,\\ Braamfontein, Johannesburg, 2000, South Africa
+  \AND {\large \bf Kovendan Jason Raman (2566527)} \\ University of the Witwatersrand, 1 Jan Smuts Ave,\\ Braamfontein, Johannesburg, 2000, South Africa}
+
+
+\begin{document}
+
+\maketitle
+\phantom{.}
+\newpage
+\phantom{.}
+\newpage
+\section{Abstract}
+{
+\bf
+\looseness=-1
+We ask how model collapse affects in-context learning (ICL) and the induction circuit that implements it. We train two-layer transformers on an adaptation of the symbol--label task of Singh et al.\ and retrain them for 6--8 generations on data written by their predecessor, in a base variant (the model writes the query's label) and an extended variant (it also writes a next symbol and its label). With real contexts the query label is a deterministic function of the input, and the base variant does not collapse. The extended variant collapses only in its free choice of the next symbol, whose true distribution is known exactly: its KL on real data rises from 0.10 to 0.56 nats in two seeds while query accuracy stays $\geq$0.999. The circuit survives because the choice does not use it: the key path that carries 99\% of the previous-token head's effect on the query label carries none of its effect on the choice. Splitting the KL separates \emph{leakage} out of the context from \emph{misallocation} within it; deleting the synthetic rows that contradict their context removes the first but not the second. At temperature 0.7 the narrowing matches a perfect learner's sampling arithmetic for four generations, then falls short of it. Collapse is not mere underfitting: training each generation three times longer halves leakage but increases misallocation. When the model also writes its contexts, copying still holds and only its choices drift. Collapse corrupts a choice made outside the induction circuit, not the circuit itself.
+}
+\begin{quote}
+\small
+\textbf{Keywords:}
+model collapse; induction heads; mechanistic interpretability
+\end{quote}
+
+\section{Introduction} \label{Intro}
+\looseness=-1
+Much of in-context learning is carried by \emph{induction heads}. At a repeated token $A$, a layer-1 head attends to whatever followed the earlier $A$ and copies it. It finds that position through a key written by a layer-0 \emph{previous-token head} \citep{elhage2021mathematical,olsson2022context}. \citet{singh2024needs} dissected how this circuit forms on a task of arbitrary but consistent symbol--label pairs.
+
+\emph{Model collapse} is the degradation of models trained recursively on their predecessors' outputs: estimation errors compound and the tails of the distribution vanish \citep{shumailov2023curse,shumailov2024collapse}, unless real data is kept \citep{gerstgrasser2024inevitable}. Collapse has been measured at the output; its effect on the \emph{mechanisms} inside a model is unknown. We place an adaptation of Singh et al.'s task in a collapse pipeline and track both the circuit and the collapsing behaviour with causal interventions \citep{conmy2023automated} and, in the spirit of \citet{chen2026mechanistic}, data deletions.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{images/fig_main.png}
+  \vspace{-14pt}
+  \caption{\looseness=-1 (a) Leakage on held-out real data rises linearly at $T{=}1$ and falls at $T{=}0.7$. (b) Misallocation (log scale) rises in every chain; 10\% real data caps it. (c) Models trained on generation-7 data: deleting its contradicting rows restores leakage (blue) but not misallocation (orange); deleting random rows does neither (dots: seeds; bars: medians). (d) Share of the previous-token head's effect carried by each path into layer 1 (33 models of the first five chains; all 70 give the same picture): almost all reaches the keys, mostly via the layer-0 MLP.}
+  \label{fig:main}
+\end{figure*}
+
+\section{Methods}
+\looseness=-1
+\textbf{Task and model.} Singh et al.\ use Omniglot exemplars, two context pairs and attention-only models; we adapt their task to discrete tokens. A sequence holds 8 (symbol, label) pairs from 32 symbols and 8 labels, with a random pairing that is consistent within the sequence, then a query symbol from the context. With distinct symbols and a loss on the query alone, our first models stayed at 0.326 test accuracy for 20{,}000 steps, the 0.325 that label counting reaches without induction. Their phase change can take far longer, so this does not show the original task is unlearnable; we changed it because the version below forms induction in every run. We use 4 distinct symbols per sequence and a loss on every repeated symbol's label (5.6 copying targets per sequence, no-induction ceiling 0.523). The model is a 2-layer transformer written from scratch (4 heads, $d_\text{model}{=}64$, MLP width 256, tied embeddings, 103k parameters), trained with AdamW (batch 256; learning rate $10^{-3}$ in every run and ablation). Validation and test sets (5{,}120 sequences each) are fixed real samples with separate seeds. A $3{\times}3$ sweep of learning rate and width on the extended variant was compared on validation loss and the rate of out-of-context choices, since validation accuracy saturates (1.000 in 6 of 9 configurations): $10^{-3}$ and width 64 is the best 64-wide setting, beaten only by a model with 4$\times$ the parameters.
+
+\textbf{Collapse pipeline.} Generation 0 trains on 200{,}000 real sequences. Generation $g$ trains on 200{,}000 sequences with fresh real contexts and answer tokens \emph{sampled} at temperature $T$ by generation $g{-}1$, so errors enter only through what the model writes. The \emph{base} variant writes the query label; the \emph{extended} variant also writes a next symbol and its label. In real data the next symbol is a uniformly chosen context slot, so a symbol filling $c$ of the 8 slots has true probability $q(s){=}c/8$. Keeping contexts real makes the base target a deterministic function of an uncorrupted input, unlike \citet{shumailov2024collapse}, where the whole distribution is regenerated. Two chains relax this: in one the model writes the whole sequence (loss on every token), and in one real and synthetic data accumulate instead of being replaced \citep{gerstgrasser2024inevitable}. We ran the base variant for 6 generations (25{,}000 steps each) and extended chains for 8 generations (8{,}000 steps each): $T{=}1$, $T{=}0.7$ and $T{=}1$ with 10\% real data, each with seeds 0 and 100; $T{=}1$ with 25{,}000 steps; generated contexts; and accumulated data.
+
+\textbf{Measures.} Every generation is scored on 10{,}000 held-out real sequences. Because $q$ is known exactly, the KL of the model's next-symbol distribution $p$ is exact and splits in two:
+\begin{equation}
+\mathrm{KL}(q\,\|\,p) = \underbrace{-\log(1-p_\text{out})}_{\text{leakage}} + \underbrace{\mathrm{KL}(q\,\|\,\tilde p)}_{\text{misallocation}},
+\label{eq:split}
+\end{equation}
+where $p_\text{out}$ is the probability on symbols absent from the context and $\tilde p$ is $p$ renormalised over the context. The slope of $\tilde p$ regressed on $q$ measures sharpening (1 means frequencies are copied exactly). As a null model, a learner that fits its data exactly turns sampling at $T$ into $p_g \propto p_0^{(1/T)^g}$; we evaluate it from the generation-0 model on the same sequences. For circuits we use \emph{resample ablation}, which replaces a head's output with its output on another sequence \citep{conmy2023automated}. \emph{Path patching} \citep{goldowskydill2023localizing} resamples a layer-0 head only in layer 1's queries, keys or values, directly or also via the layer-0 MLP; a path's \emph{share} is $(1-\text{acc}_\text{path})/(1-\text{acc}_\text{head})$, and shares need not sum to 1 because paths interact. We run every intervention twice, scoring the query label and the next-symbol choice (Eq.~\ref{eq:split}). In the spirit of \citet{chen2026mechanistic}, who attribute behaviour to individual samples, we take the coarser step of retraining fresh models (3 seeds each) on generation-7 data from the seed-0 $T{=}1$ chain with or without its context-contradicting rows, and on real data with answer targets removed. The \emph{phase change} is the first evaluation (every 250 steps) with validation accuracy $\geq$0.9.
+
+\section{Results}
+\looseness=-1
+\textbf{No collapse in the base variant.} Every generation reaches test accuracy 1.000, and induction forms at 4{,}000--7{,}750 steps (supplementary Fig.~\ref{fig:training}). Errors in the generated labels fall from $4.5{\times}10^{-5}$ to $5{\times}10^{-6}$, and label entropy stays at its maximum. In all 38 models of the first five chains, query accuracy on the model's own training data equals, within 0.001, the share of rows whose label agrees with the context (supplementary Table~\ref{tab:train}): models copy the context instead of learning the sampled errors, as real contexts make possible.
+
+\textbf{The extended variant collapses only in its free choice.} Query and next-label accuracy on real data stay $\geq$0.997 and query perplexity on the test set $\leq$1.008 in every generation of every chain, yet the next-symbol KL grows from 0.099 to 0.558 (seed 0) and 0.550 (seed 100) by generation 7 (Table~\ref{tab:collapse}). Leakage follows $p_{\text{out},g} \approx (1-\alpha)\,p_{\text{out},g-1} + \delta$ with $\alpha \leq 0.05$ and $\delta \approx 0.02$ (supplementary Table~\ref{tab:fit}; with 8 near-linear points this fit is descriptive): nothing pulls leakage back (Fig.~\ref{fig:main}a), and each generation adds about generation 0's own error (2.2\%), so the drift is accumulated approximation error. Training each generation for 25{,}000 instead of 8{,}000 steps confirms this for leakage, which halves ($\delta{=}0.009$; 7.2\% at generation 7), but not for misallocation, which grows faster (0.578 vs.\ 0.398 nats), plausibly because 32 passes over each dataset instead of 10 fit its sampling noise more closely (one chain; supplementary Table~\ref{tab:revision}). Even so, 70\% of the KL is misallocation among valid symbols (Fig.~\ref{fig:main}b). Its fit changes sign between seeds ($\alpha{=}{-0.06}$, $+0.09$), and sharpening towards common symbols does not replicate (slope 1.27 vs.\ 1.04), so at $T{=}1$ misallocation need not be a bias towards common symbols.
+
+\textbf{Temperature decides which collapse occurs, and sampling explains most of it.} At $T{=}0.7$ leakage \emph{falls} (2.2\%$\to$0.5\%) while misallocation reaches 2.56 nats and the slope 1.92; a symbol filling one slot is chosen with probability 0.017 (true 0.125; supplementary Fig.~\ref{fig:collapse}d). Through generation 4 the null model accounts for most of this (misallocation 1.14 vs.\ null 1.19, slope 1.84 vs.\ 1.82, one-slot 0.023 vs.\ 0.023; supplementary Table~\ref{tab:null}): the narrowing is largely the sampling operator, not learning. From generation 5 the learner collapses \emph{less} than the null (2.56 vs.\ 5.05 nats at generation 7) and keeps 0.5\% leakage where the null has none. A second seed agrees (leakage 1.7\%$\to$0.5\%; misallocation 2.69 vs.\ null 5.01; slope 1.77).
+With 10\% real data the KL roughly halves (0.296 and 0.305 in two seeds). Leakage is pulled back with $\alpha{=}0.14$ and 0.07, near the 0.10 that mixing predicts, and is still rising (11.8\%, 10.8\%); misallocation levels off near 0.17--0.19 from generation 4, though these fits are weak ($R^2{=}0.83$, 0.80). Accumulating real and synthetic data instead \citep{gerstgrasser2024inevitable} limits collapse further: leakage reaches 5.7\% and misallocation stays at its generation-0 level (0.06--0.07 nats).
+
+\textbf{Filtering removes the expected failure only.} Models trained on generation-7 data inherit its collapse (leakage 0.16--0.17, misallocation 0.40--0.42). Its context-contradicting rows (14.5\%) are the only source of out-of-context targets, so deleting them should restore real-data leakage, and it does (0.016--0.018 vs.\ 0.018--0.023). The informative result is that misallocation (0.42--0.47) and sharpening survive the deletion: they live in rows that each look correct. Deleting as many random rows changes nothing (Fig.~\ref{fig:main}c).
+
+\textbf{Copying survives generated contexts.} When the model writes whole sequences, at least 99.5\% of repeated symbols in its contexts keep their label, and real-data query accuracy stays $\geq$0.9997 through generation 7. Every free choice drifts instead: the KL of the context symbols rises from 0.18 to 1.17 nats per sequence, contexts gain distinct symbols (3.66$\to$4.12; real data has at most 4), and 8.3\% of queries leave the context, which accounts for almost all of the 7.8\% of generated query labels that disagree with it (supplementary Table~\ref{tab:revision}).
+
+\setlength{\belowcaptionskip}{-7pt}
+\begin{table}[h!]
+\centering
+\captionsetup{font=sf, width=0.95\linewidth, skip=4pt}
+\caption{\looseness=-1 Next-symbol choice on held-out real data. mis.: misallocation (Eq.~\ref{eq:split}); 1-slot: choice probability of a symbol filling one slot (true 0.125).}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Chain (generation) & $p_\text{out}$ & mis. & KL & slope & 1-slot \\
+\midrule
+$T{=}1$, seed 0 (0) & 2.2\% & 0.076 & 0.099 & 1.01 & 0.118 \\
+$T{=}1$, seed 0 (7) & 14.8\% & 0.398 & 0.558 & 1.27 & 0.085 \\
+$T{=}1$, seed 100 (7) & 15.0\% & 0.387 & 0.550 & 1.04 & 0.118 \\
+$T{=}1$, 10\% real (7) & 11.8\% & 0.171 & 0.296 & 1.14 & 0.103 \\
+$T{=}0.7$ (7) & 0.5\% & 2.562 & 2.567 & 1.92 & 0.017 \\
+\bottomrule
+\end{tabular}
+\label{tab:collapse}
+\end{table}
+\setlength{\belowcaptionskip}{0pt}
+
+\textbf{The query circuit survives collapse.} In all 78 models, resampling layer 1 drops query accuracy to chance (0.117--0.132), resampling layer 0 drops it to 0.21--0.43, and the best previous-token and induction scores stay $\geq$0.89 and $\geq$0.96 (supplementary Table~\ref{tab:choice}). In the 70 models where one layer-0 head matters (in the other 8 several heads share the role), the path into layer 1's \emph{keys} carries a median 99\% of its effect (93--108\%), queries none and values at most 12\% (Fig.~\ref{fig:main}d). This is K-composition, but the direct head-to-key edge carries only 10\%: unlike \citet{singh2024needs}'s attention-only models, ours relay the signal through the layer-0 MLP. Zero ablation understates induction heads: the key layer-1 head drops accuracy to a median 0.54 when resampled but only 0.96 when zeroed, because zeroing silences its vote while resampling makes it vote for a wrong label.
+
+\textbf{The collapsing choice runs outside this circuit.} Scored on the next-symbol choice, the same interventions disagree (72 extended models; supplementary Table~\ref{tab:choice}). Patching the previous-token head into layer 1's queries, keys or values changes the choice KL by at most 0.06 nats in the 64 models trained on real contexts (median 0.00), and by at most 0.19 in the generated-context chain, whose models also learn to write contexts. The query-critical induction head raises misallocation no more than any other layer-1 head (median difference $-0.02$ nats). Both layers still matter: resampling layer 1 raises misallocation from a median 0.17 to 1.34 nats, and layer 0 to 1.71. At the choice position every layer-1 head attends $\sim$90\% to context symbols, reading them directly rather than through induction; at $T{=}0.7$ this attention stays near-uniform over slots (implied misallocation 0.22$\to$0.03 and 0.12$\to$0.04 in two seeds, heads pooled) while the output sharpens, so the sharpening arises downstream of it.
+
+\textbf{The objective, not the data, sets when induction forms.} Generation-7 data forms induction as fast as real data (750--1{,}250 vs.\ 750--1{,}750 steps). Removing the next-symbol target, at the same learning rate, delays it to 6{,}250--7{,}750 steps (supplementary Fig.~\ref{fig:interventions}b), which explains why extended models form induction seven times sooner.
+
+
+\section{Discussion}
+\looseness=-1
+The base result follows largely from our design: when the answer is a deterministic function of a real context, a model that learns induction must reject sampled errors, so copying corrects them instead of propagating them. The generated-context chain shows this is not only an artefact of real contexts: a model that writes its own contexts still pairs and copies consistently, and collapse moves into its choice of symbols. Where the model has freedom, collapse appears in a computation the induction circuit does not perform: matching choices to $c/8$ is counting, not copying. So the circuit stays intact because it is not where collapse happens, and a model can pass every ICL accuracy test, and every circuit test built on them, while its generative distribution collapses.
+
+Eq.~\ref{eq:split} shows that ``collapse'' is two failures. Leakage, meaning impossible outputs, comes from detectably wrong rows, so a consistency filter removes it. Misallocation, meaning distorted frequencies among valid outputs, lives in rows that each look correct; no per-sample filter can remove it, and only real data limits it. Temperature trades one failure for the other, mostly by sampling arithmetic alone, as biased sampling trades diversity for quality in \citet{alemohammad2024mad}; per-sample verification, which prevents collapse in \citet{feng2025beyond}, here addresses only the visible half. At $T{=}1$ the drift accumulates because nothing removes it, but its two parts differ: more training per generation shrinks leakage, the learner's approximation error, yet enlarges misallocation, consistent with each model fitting its finite sample's noise, the statistical error of \citet{shumailov2024collapse}. Collapse here is not just repeated underfitting. Mechanistically, our circuit differs from \citet{singh2024needs}'s attention-only one: with MLPs, K-composition runs mainly through the layer-0 MLP. The training objective, not data quality, catalyses its formation, an objective-level counterpart to \citet{chen2026mechanistic}.
+
+\textbf{Limitations.} Two seeds per temperature and for 10\% real data; one chain each for 25{,}000 steps, generated contexts and accumulation. Chains are short (8 generations; base 6), generation is confounded with seed, the deletion test covers one chain, and resample ablation uses one corruption. Our task adapts rather than reproduces Singh et al.'s.
+
+\section{Contribution Statements (Not in Page Limit)}
+All three authors contributed equally. \textbf{Shervaan Govinder} implemented the transformer, the in-context learning task and the first collapse pipeline, ran the hyper-parameter sweeps and the seed-100 replication, and wrote the project's analysis tools. \textbf{Jaishil Patel} wrote the extended abstract, made the paper figures, and ran the embedding, attention, train-accuracy and leakage-recursion analyses. \textbf{Kovendan Jason Raman} implemented the recursive base variant, the real-data evaluation and the leakage/misallocation split, ran the collapse chains on the cluster, and carried out the path-patching, circuit-formation and data-deletion experiments. All authors designed the study, interpreted the results and edited the paper.
+
+\section{Acknowledgements (Not in Page Limit)}
+Computations were performed using High Performance Computing infrastructure provided by the Mathematical Sciences Support Unit at the University of the Witwatersrand.
+
+\bibliographystyle{apacite}
+
+\setlength{\bibleftmargin}{.125in}
+\setlength{\bibindent}{-\bibleftmargin}
+
+\bibliography{ccn_style}
+
+% ---------------------------------------------------------------------------
+% REQUIRED before submission (the project is not marked without the checklist):
+%   1. NeurIPS 2024 checklist: paste the .tex from Moodle here and fill it in.
+%   2. Wits Science Faculty AI Ethics Form.
+% ---------------------------------------------------------------------------
+\section*{NeurIPS Paper Checklist}
+\input{neurips_checklist}
+
+\section{Wits Science Faculty AI Ethics Statement}
+% Signed form, exported from AI_declaration_filled.docx as ai_declaration.pdf
+\IfFileExists{ai_declaration.pdf}{\includepdf[pages=-]{ai_declaration.pdf}}{Signed declaration: ai\_declaration.pdf (missing).}
+
+% Supplementary material: figures referenced from the main text, made by
+% scripts/paper_figures.py and scripts/embeddings.py from results/v2.
+\onecolumn
+\appendix
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.94\textwidth]{images/fig_training.png}
+  \caption{\looseness=-1 Training dynamics. (a) Validation accuracy (query label, real data) during training for every generation of the base chain (grey) and the seed-0 $T=1$ extended chain (blue; darker means later generation). Every model sits at the 0.523 no-induction ceiling until a sudden phase change; extended models cross it about seven times sooner (median 875 vs.\ 6{,}250 steps). (b) Training loss of generations 0 and 7. Its floor comes from the free next-symbol choice and moves in opposite directions at $T=1$ and $T=0.7$. (c) Final training loss of each generation: synthetic data becomes harder to predict at $T=1$ and easier at $T=0.7$, since sharpened choices are more predictable.}
+  \label{fig:training}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{\looseness=-1 Accuracy on each model's own training data (train) against the share of training rows whose label agrees with the context (data ok) and accuracy on held-out real data (real), for the first and last generation of each chain. Next-label ``data ok'' counts only rows whose next symbol is in the context. From generation 1 the training labels were sampled by the previous model, so train accuracy is measured against those samples, errors included. Train next-label accuracy falls to 0.91 at $T{=}1$ while real next-label accuracy stays $\geq$0.997: the errors are in the synthetic data, and the model does not reproduce them on real contexts. Made by \texttt{scripts/train\_accuracy.py}.}
+\small
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+& \multicolumn{3}{c}{Query label} & \multicolumn{3}{c}{Next label} & \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Chain (generation) & train & data ok & real & train & data ok & real & Train loss \\
+\midrule
+Base (0) & 1.0000 & 1.0000 & 1.0000 & -- & -- & -- & 0.0000 \\
+Base (5) & 1.0000 & 1.0000 & 1.0000 & -- & -- & -- & 0.0000 \\
+$T{=}1$, seed 0 (0) & 0.9998 & 1.0000 & 0.9996 & 0.9994 & 1.0000 & 0.9995 & 0.166 \\
+$T{=}1$, seed 0 (7) & 0.9993 & 0.9993 & 1.0000 & 0.9076 & 0.9949 & 0.9988 & 0.244 \\
+$T{=}1$, seed 100 (0) & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 1.0000 & 0.165 \\
+$T{=}1$, seed 100 (7) & 0.9976 & 0.9976 & 1.0000 & 0.9088 & 0.9936 & 0.9998 & 0.247 \\
+$T{=}1$, 10\% real (7) & 0.9982 & 0.9993 & 0.9993 & 0.9276 & 0.9950 & 0.9973 & 0.245 \\
+$T{=}0.7$ (7) & 0.9997 & 0.9999 & 0.9998 & 0.9994 & 1.0000 & 0.9996 & 0.039 \\
+\bottomrule
+\end{tabular}
+\label{tab:train}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{\looseness=-1 Fit of $x_g = (1-\alpha)\,x_{g-1} + \delta$ over generations 0--7 on held-out real data, for leakage $x{=}p_\text{out}$ and misallocation (Eq.~\ref{eq:split}). Derivation: if each model reproduces the leakage of its training data and adds a fresh error $\delta$, and a share $r$ of the training rows is real (with $p_\text{out}{=}0$), then $p_{\text{out},g} = (1-r)\,p_{\text{out},g-1} + \delta$, so $\alpha \approx r$; for $\alpha > 0$, $x$ settles at $\delta/\alpha$. Without real data $\alpha \approx 0$ and leakage grows by $\delta$ per generation. With 10\% real data the fitted $\alpha{=}0.14$ for leakage is close to $r{=}0.1$. Negative $\alpha$ means accelerating growth. Eight near-linear points give a high $R^2$ almost regardless of the model, so these fits describe the trajectories rather than test the recursion; the misallocation $\alpha$ changes sign between the two $T{=}1$ seeds, and its 10\%-real fit is weak. Made by \texttt{scripts/leakage\_fit.py}.}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& \multicolumn{3}{c}{Leakage $p_\text{out}$} & \multicolumn{3}{c}{Misallocation} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Chain & $\alpha$ & $\delta$ & $R^2$ & $\alpha$ & $\delta$ & $R^2$ \\
+\midrule
+$T{=}1$, seed 0 & 0.049 & 0.022 & 0.992 & $-0.064$ & 0.033 & 0.986 \\
+$T{=}1$, seed 100 & 0.007 & 0.019 & 0.993 & 0.091 & 0.064 & 0.984 \\
+$T{=}1$, 10\% real & 0.137 & 0.023 & 0.998 & 0.317 & 0.057 & 0.833 \\
+$T{=}1$, 10\% real, seed 100 & 0.073 & 0.017 & 0.992 & 0.412 & 0.076 & 0.801 \\
+$T{=}0.7$ & 0.054 & $-0.002$ & 0.871 & $-0.137$ & 0.232 & 0.984 \\
+$T{=}0.7$, seed 100 & 0.036 & $-0.001$ & 0.778 & $-0.094$ & 0.278 & 0.983 \\
+$T{=}1$, 25{,}000 steps & 0.004 & 0.009 & 0.999 & 0.007 & 0.070 & 0.987 \\
+$T{=}1$, generated contexts & $-0.123$ & 0.008 & 0.983 & 0.143 & 0.029 & 0.985 \\
+$T{=}1$, accumulated data & 0.294 & 0.018 & 0.903 & 0.591 & 0.038 & 0.136 \\
+\bottomrule
+\end{tabular}
+\label{tab:fit}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{\looseness=-1 The seed-0 $T{=}0.7$ chain against a null model of pure sampling, on held-out real data. If every generation fitted its training data exactly, sampling at $T$ would give $p_g \propto p_0^{(1/T)^g}$. \emph{Pure}: $p_0{=}q$, the true choice. \emph{Anchored}: $p_0$ is the generation-0 model, errors included. Through generation 4 the trained chain tracks the anchored null closely in misallocation, slope and one-slot probability; from generation 5 it collapses less than the null, and it keeps some leakage, which the null removes within two generations. The seed-100 chain runs 10--40\% above its null in misallocation through generation 4 (1.30 vs.\ 1.18 at generation 4), then falls well below it (2.69 vs.\ 5.01 at generation 7; slope 1.77 vs.\ 1.95; one-slot 0.027 vs.\ 0.013). At $T{=}1$ both nulls are flat, so all $T{=}1$ drift is learner error. Made by \texttt{scripts/sampling\_null.py}.}
+\small
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+& & Pure & \multicolumn{2}{c}{Misallocation} & \multicolumn{2}{c}{$p_\text{out}$} & \multicolumn{2}{c}{Slope} & 1-slot (true 0.125) \\
+\cmidrule(lr){3-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-10}
+Gen. & $(1/T)^g$ & mis. & null & trained & null & trained & null & trained & null / trained \\
+\midrule
+0 & 1.00 & 0.000 & 0.076 & 0.076 & 2.2\% & 2.2\% & 1.01 & 1.01 & 0.118 / 0.118 \\
+1 & 1.43 & 0.016 & 0.161 & 0.174 & 0.4\% & 2.4\% & 1.26 & 1.30 & 0.085 / 0.079 \\
+2 & 2.04 & 0.084 & 0.339 & 0.382 & 0.0\% & 1.9\% & 1.49 & 1.55 & 0.056 / 0.051 \\
+3 & 2.92 & 0.243 & 0.662 & 0.697 & 0.0\% & 1.6\% & 1.68 & 1.73 & 0.035 / 0.032 \\
+4 & 4.16 & 0.543 & 1.194 & 1.139 & 0.0\% & 1.1\% & 1.82 & 1.84 & 0.023 / 0.023 \\
+5 & 5.95 & 1.044 & 2.018 & 1.679 & 0.0\% & 0.8\% & 1.90 & 1.90 & 0.016 / 0.019 \\
+6 & 8.50 & 1.821 & 3.248 & 2.170 & 0.0\% & 0.6\% & 1.94 & 1.92 & 0.013 / 0.017 \\
+7 & 12.14 & 2.979 & 5.045 & 2.562 & 0.0\% & 0.5\% & 1.96 & 1.92 & 0.011 / 0.017 \\
+\bottomrule
+\end{tabular}
+\label{tab:null}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{\looseness=-1 The same interventions scored on the query label (accuracy) and on the next-symbol choice (leakage and misallocation, nats; Eq.~\ref{eq:split}), on held-out real data. Medians [range] over the 72 extended models (a generation-0 model shared by several chains is counted in each). \emph{Induction head}: the layer-1 head whose resampling most lowers query accuracy; \emph{previous-token head}: the same in layer 0, patched only into layer 1's queries, keys or values, including the route via the layer-0 MLP. The key path that carries the previous-token head's effect on the query label leaves the choice unchanged (at most 0.06 nats in the 64 models with real contexts; at most 0.19, mainly via values, in the generated-context chain), and the induction head matters no more for the choice than the layer-1 heads that do not matter for the query. Across all 78 models the best previous-token score is 0.89--1.00 and the best induction score 0.96--1.00 (attention from each label to its symbol, and from the query to the label after its earlier occurrence; \texttt{scripts/attention\_scores.py}). In 8 models (the seed-100 generation-0 model, shared by three chains; $T{=}0.7$ generations 1 and 4; 10\%-real generations 4 and 6; accumulated-data generation 4) no single layer-0 head drops query accuracy below 0.9, yet resampling all of layer 0 gives 0.38--0.43: several heads share the previous-token role, so these are left out of the path shares. Made by \texttt{scripts/choice\_circuit.py}.}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Resampled & Query accuracy & Choice leakage & Choice misallocation \\
+\midrule
+nothing & 1.00 [1.00, 1.00] & 0.05 [0.00, 0.16] & 0.17 [0.03, 2.62] \\
+all of layer 0 & 0.37 [0.21, 0.43] & 1.32 [0.54, 2.22] & 1.71 [0.93, 5.07] \\
+all of layer 1 & 0.12 [0.12, 0.13] & 0.52 [0.09, 1.05] & 1.34 [0.38, 3.27] \\
+induction head & 0.54 [0.12, 0.97] & 0.10 [0.01, 0.24] & 0.40 [0.08, 2.51] \\
+other layer-1 heads (mean) & 0.99 [0.90, 1.00] & 0.10 [0.01, 0.24] & 0.40 [0.15, 2.73] \\
+previous-token head $\to$ queries & 1.00 [1.00, 1.00] & 0.05 [0.00, 0.16] & 0.18 [0.03, 2.61] \\
+previous-token head $\to$ keys & 0.59 [0.39, 0.98] & 0.05 [0.00, 0.16] & 0.18 [0.04, 2.61] \\
+previous-token head $\to$ values & 1.00 [0.93, 1.00] & 0.05 [0.00, 0.16] & 0.19 [0.06, 2.61] \\
+\bottomrule
+\end{tabular}
+\label{tab:choice}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{\looseness=-1 Chains added after review: next-symbol choice on held-out real data at generations 0 and 7 (as in Table~\ref{tab:collapse}), and real-data query accuracy. \emph{25{,}000 steps}: the seed-0 $T{=}1$ chain with each generation trained 3$\times$ longer on the same data; compare Table~\ref{tab:collapse} (8{,}000 steps: 2.2\%/0.076 at generation 0, 14.8\%/0.398 at generation 7). \emph{Generated contexts}: the model writes the whole sequence, with a loss on every token. Its contexts at generation 0 $\to$ 7: repeated symbols keep their label 99.9\% $\to$ 99.5\%; distinct symbols per context 3.66 $\to$ 4.12 (real 3.60, at most 4); query in the context 99.2\% $\to$ 91.7\%; generated query label agrees with the context 99.4\% $\to$ 92.2\%; exact KL of the context symbols 0.18 $\to$ 1.17 nats per sequence. \emph{Accumulated data}: each generation trains on the real data plus all earlier generations' data \citep{gerstgrasser2024inevitable}. Made by \texttt{scripts/cluster/revision.sbatch} and \texttt{revision\_analysis.sbatch}.}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Chain (generation) & $p_\text{out}$ & mis. & KL & slope & 1-slot & query acc. \\
+\midrule
+25{,}000 steps (0) & 1.0\% & 0.102 & 0.112 & 1.03 & 0.115 & 1.0000 \\
+25{,}000 steps (7) & 7.2\% & 0.578 & 0.652 & 1.11 & 0.100 & 0.9999 \\
+Generated contexts (0) & 0.7\% & 0.031 & 0.038 & 0.94 & 0.128 & 0.9999 \\
+Generated contexts (7) & 9.2\% & 0.145 & 0.241 & 0.89 & 0.120 & 0.9999 \\
+Accumulated data (7) & 5.7\% & 0.068 & 0.127 & 1.08 & 0.112 & 0.9999 \\
+$T{=}0.7$, seed 100 (7) & 0.5\% & 2.690 & 2.695 & 1.77 & 0.027 & 0.9989 \\
+10\% real, seed 100 (7) & 10.8\% & 0.191 & 0.305 & 1.04 & 0.116 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\label{tab:revision}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/fig_collapse.png}
+  \caption{\looseness=-1 Drift of the next-symbol choice on held-out real data. (a) Leakage rises linearly at $T{=}1$ and falls at $T{=}0.7$. (b) Misallocation rises in every chain (log scale); 10\% real data caps it. (c) Sharpening: strong at $T{=}0.7$, seed-dependent at $T{=}1$. (d) Choice probability by how many slots a symbol fills at generation 7: single-slot symbols almost vanish at $T{=}0.7$.}
+  \label{fig:collapse}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/fig_interventions.png}
+  \caption{\looseness=-1 Interventions (dots: seeds or models; bars: medians). (a) Deleting generation-7's contradicting rows restores leakage (blue) but not misallocation (orange); deleting random rows does neither. (b) The next-symbol target makes induction form seven times sooner. (c) Share of the previous-token head's effect carried by each path into layer 1 (33 models): nearly all goes to the keys, mostly via the layer-0 MLP.}
+  \label{fig:interventions}
+\end{figure}
+
+\IfFileExists{images/fig_embeddings.png}{
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{images/fig_embeddings.png}
+  \caption{\looseness=-1 Token embeddings and attention. (a, b) PCA of the symbol and label embeddings at generations 0 and 7 of the seed-0 $T=1$ chain: symbols and labels stay in two separate clusters. (c) Mean $|\cos|$ between symbol embeddings after removing the mean symbol. Extended models keep symbols as distinct as random vectors (0.09--0.12; dashed line 0.10) in every generation of both chains, and symbols that the synthetic data over-chooses do not gain larger embedding norms (correlation $-0.46$ to $+0.29$, changing sign between generations). Base models keep them far less distinct (0.40--0.55), plausibly because they never have to output a symbol through the tied unembedding. (d, e) Attention of the generation-7 model on one real sequence. The previous-token head (L0H0) sends each label to the symbol before it; the induction head (L1H2) sends each repeated symbol to the label that followed its earlier occurrence. Collapse leaves both the embedding and the attention pattern intact.}
+  \label{fig:embeddings}
+\end{figure}
+}{}
+
+\end{document}

@@ -117,20 +117,28 @@ def generate_extended_dataset(model, cfg: Config, seed: int) -> torch.Tensor:
     (<= 0 means argmax). Each token is restricted to the right type (label /
     symbol / label) so every sequence stays well-formed; which label or symbol
     is chosen is up to the model.
+    With ``cfg.gen_context`` the model writes the whole sequence: only the
+    first symbol is drawn (uniformly, as in real data, where symbol ids are
+    exchangeable); every later token, context and query included, is sampled.
     Returns a CPU LongTensor [cfg.dataset_size, 2*n_pairs + 1 + n_written].
     """
     model.eval()
     g = torch.Generator().manual_seed(seed)
     is_label = torch.arange(cfg.vocab_size) >= cfg.n_symbols
+    T = 2 * cfg.n_pairs + 1 + n_written(cfg)
     chunks, left = [], cfg.dataset_size
     while left > 0:
         n = min(4096, left)
-        ctx, _ = make_icl_batch(
-            n, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
-            device="cpu", generator=g, n_unique=cfg.n_unique,
-        )
-        seq = ctx.to(cfg.device)
-        for want_label in (True, False, True)[: n_written(cfg)]:
+        if cfg.gen_context:
+            seq = torch.randint(0, cfg.n_symbols, (n, 1), generator=g).to(cfg.device)
+        else:
+            seq, _ = make_icl_batch(
+                n, cfg.n_pairs, cfg.n_symbols, cfg.n_labels,
+                device="cpu", generator=g, n_unique=cfg.n_unique,
+            )
+            seq = seq.to(cfg.device)
+        while seq.shape[1] < T:
+            want_label = seq.shape[1] % 2 == 1        # symbols at even positions, labels at odd
             logits = model(seq)[:, -1, :].float().cpu()
             logits = logits.masked_fill(~(is_label if want_label else ~is_label), float("-inf"))
             if cfg.collapse_temperature <= 0:
@@ -205,8 +213,132 @@ def base_stats(data: torch.Tensor, cfg: Config) -> dict:
     }
 
 
+@torch.no_grad()
+def context_stats(data: torch.Tensor, cfg: Config) -> dict:
+    """Describe the contexts and queries themselves (generated-context chain).
+
+    distinct_symbols     mean number of distinct symbols in the context
+    pairing_consistent   share of repeated context symbols whose label equals
+                         the label of their first appearance (real: 1.0)
+    query_in_context     query symbol appears in the context (real: 1.0)
+    query_slot_share     mean share of context slots holding the query symbol
+                         (real: E[c/8] under uniform slot choice)
+    context_symbol_entropy / context_label_entropy  over all context tokens
+    """
+    data = data.cpu()
+    K, S, NL = cfg.n_pairs, cfg.n_symbols, cfg.n_labels
+    syms, labs, q = data[:, 0:2 * K:2], data[:, 1:2 * K:2], data[:, 2 * K]
+    same = syms[:, :, None] == syms[:, None, :]
+    earlier = torch.tril(torch.ones(K, K), diagonal=-1).bool()
+    first = (same & earlier).float().argmax(dim=2)                    # earliest earlier match
+    repeated = (same & earlier).any(dim=2)
+    first_lab = labs.gather(1, first)
+    distinct = (~repeated).sum(1).float()
+    qmatch = (syms == q[:, None]).float()
+    return {
+        "distinct_symbols": float(distinct.mean()),
+        "pairing_consistent": float((first_lab == labs)[repeated].float().mean()),
+        "query_in_context": float((qmatch.sum(1) > 0).float().mean()),
+        "query_slot_share": float(qmatch.mean(1).mean()),
+        "context_symbol_entropy": distribution_entropy(torch.bincount(syms.flatten().clamp(0, S - 1), minlength=S)),
+        "context_label_entropy": distribution_entropy(
+            torch.bincount((labs.flatten() - S).clamp(0, NL - 1), minlength=NL)),
+    }
+
+
 def data_stats(data: torch.Tensor, cfg: Config) -> dict:
-    return extended_stats(data, cfg) if cfg.variant == "extended" else base_stats(data, cfg)
+    st = extended_stats(data, cfg) if cfg.variant == "extended" else base_stats(data, cfg)
+    if cfg.gen_context:
+        st.update(context_stats(data, cfg))
+    return st
+
+
+@torch.no_grad()
+def context_true_logprobs(seq: torch.Tensor, cfg: Config) -> torch.Tensor:
+    """Exact log-probabilities under the real process for every token that the
+    full-sequence (generated-context) model writes, [B, T-1, vocab] for the
+    tokens at positions 1..T-1 (-inf where impossible).
+
+    Real process: n_unique distinct symbols, each context slot uniformly one of
+    them, one uniform label per distinct symbol, query = a uniform slot's
+    symbol, then the extended answers. So at context slot i, with d distinct
+    symbols seen, each seen symbol has 1/U and each unseen one (U-d)/U/(S-d);
+    a first-seen symbol's label is uniform; a repeat's label is copied; the
+    query and the next symbol are context symbols with probability c/K.
+    """
+    seq = seq.cpu()
+    B, T = seq.shape
+    K, S, NL, U = cfg.n_pairs, cfg.n_symbols, cfg.n_labels, cfg.n_unique or cfg.n_pairs
+    V = cfg.vocab_size
+    out = torch.full((B, T - 1, V), float("-inf"))
+    rows = torch.arange(B)
+    counts = torch.zeros(B, S)
+    lab_of = torch.full((B, S), -1, dtype=torch.long)
+    for t in range(1, T):
+        prev = seq[:, t - 1]
+        if t % 2 == 1:                                         # a label follows symbol `prev`
+            known = lab_of[rows, prev]
+            p = torch.full((B, V), float("-inf"))
+            p[:, S:] = -torch.log(torch.tensor(float(NL)))
+            hit = known >= 0
+            p[hit] = float("-inf")
+            p[hit, known[hit]] = 0.0
+            out[:, t - 1] = p
+            if t < 2 * K:
+                lab_of[rows, prev] = seq[:, t]
+        else:
+            if t < 2 * K:                                      # next context slot
+                seen = counts > 0
+                d = seen.sum(1, keepdim=True).float()
+                p_seen = torch.full((B, S), 1.0 / U)
+                p_new = ((U - d) / U / (S - d)).expand(B, S)
+                probs = torch.where(seen, p_seen, p_new)
+            else:                                              # query, or next symbol
+                probs = counts / K
+            lp = torch.full((B, V), float("-inf"))
+            lp[:, :S] = probs.log()
+            out[:, t - 1] = lp
+        if t - 1 < 2 * K and (t - 1) % 2 == 0:
+            counts[rows, seq[:, t - 1]] += 1
+    return out
+
+
+def real_eval(model, cfg: Config, data: torch.Tensor, batch: int = 2048) -> dict:
+    ev = _real_eval(model, cfg, data, batch)
+    if cfg.gen_context:
+        ev.update(context_eval(model, cfg, data, batch))
+    return ev
+
+
+@torch.no_grad()
+def context_eval(model, cfg: Config, data: torch.Tensor, batch: int = 2048) -> dict:
+    """Exact KL(true || model) for the tokens a generated-context model writes,
+    on real sequences, each restricted to the right token type (as when
+    generating) and averaged per sequence:
+
+    ctx_symbol_kl   summed over context slots 2..K
+    ctx_label_kl    summed over context labels (first-seen: uniform; repeats: copied)
+    query_choice_kl the query symbol (true: c/K)
+    """
+    model.eval()
+    K, S = cfg.n_pairs, cfg.n_symbols
+    sums = {"ctx_symbol_kl": 0.0, "ctx_label_kl": 0.0, "query_choice_kl": 0.0}
+    is_label = torch.arange(cfg.vocab_size) >= S
+    for i in range(0, data.shape[0], batch):
+        seq = data[i:i + batch].to(cfg.device)
+        lp_true = context_true_logprobs(seq, cfg)                         # [B, T-1, V]
+        logits = model(seq)[:, :-1].float().cpu()
+        T1 = logits.shape[1]
+        want_label = (torch.arange(1, T1 + 1) % 2 == 1)[:, None]           # [T-1, 1]
+        mask = torch.where(want_label, is_label[None], ~is_label[None])   # [T-1, V]
+        lp = logits.masked_fill(~mask[None], float("-inf")).log_softmax(-1)
+        pt = lp_true.exp()
+        kl = (pt * (lp_true - lp)).nan_to_num(0.0).sum(-1)               # [B, T-1]
+        pos = torch.arange(1, T1 + 1)                                       # position of the predicted token
+        sums["ctx_symbol_kl"] += float(kl[:, (pos % 2 == 0) & (pos < 2 * K)].sum())
+        sums["ctx_label_kl"] += float(kl[:, (pos % 2 == 1) & (pos < 2 * K)].sum())
+        sums["query_choice_kl"] += float(kl[:, pos == 2 * K].sum())
+    return {k: v / data.shape[0] for k, v in sums.items()}
 
 
 def mix_real(data: torch.Tensor, real: torch.Tensor, frac: float, seed: int) -> torch.Tensor:
@@ -219,7 +351,7 @@ def mix_real(data: torch.Tensor, real: torch.Tensor, frac: float, seed: int) -> 
 
 
 @torch.no_grad()
-def real_eval(model, cfg: Config, data: torch.Tensor, batch: int = 2048) -> dict:
+def _real_eval(model, cfg: Config, data: torch.Tensor, batch: int = 2048) -> dict:
     """Score a model on fixed *real* sequences at every position it writes.
 
     This is the analogue of Shumailov et al.'s perplexity on the original
@@ -359,6 +491,7 @@ def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None):
         else:
             rec["real_eval"] = real_eval(model, gen_cfg, eval_set)
             # This generation writes the data the next generation trains on.
+            prev = dataset
             dataset = generate_extended_dataset(model, gen_cfg, EXT_DATA_SEED + 1000 * (gen + 1) + cfg.seed)
             stats = data_stats(dataset, gen_cfg)          # model-written rows only, before any mixing
             rec["generated_stats"] = stats
@@ -367,6 +500,8 @@ def run_collapse(cfg: Config, log=print, save_dir: Optional[str] = None):
             rec["next_label_entropy"] = stats["label_entropy"]
             if cfg.real_frac > 0:
                 dataset = mix_real(dataset, real, cfg.real_frac, EXT_DATA_SEED + 500 + gen + cfg.seed)
+            if cfg.accumulate:  # Gerstgrasser et al.: keep the real data and every generation's data
+                dataset = torch.cat([prev, dataset])
             log(f"gen {gen} | test acc {test['acc']:.3f} | {format_real_eval(rec['real_eval'])}")
             log(f"gen {gen} | generated: {format_stats(stats)}")
         history.append(rec)
@@ -399,6 +534,10 @@ def main():
     p.add_argument("--dataset_size", type=int, default=None, help="sequences per generation")
     p.add_argument("--real_frac", type=float, default=None,
                    help="share of each later generation's data kept from the original real data")
+    p.add_argument("--gen_context", action="store_true",
+                   help="extended: the model writes the whole sequence (full next-token loss)")
+    p.add_argument("--accumulate", action="store_true",
+                   help="train each generation on the real data plus every earlier generation's data")
     p.add_argument("--device", type=str, default=None, help="cpu, cuda or mps")
     p.add_argument("--threads", type=int, default=None, help="CPU threads (CPU runs only)")
     p.add_argument("--out", type=str, default=None, help="save full results as JSON, e.g. results/collapse_base.json")
@@ -416,6 +555,10 @@ def main():
         cfg.collapse_temperature = args.temperature
     if args.dense_loss:
         cfg.dense_loss = True
+    if args.gen_context:
+        cfg.gen_context, cfg.ext_targets = True, "full"
+    if args.accumulate:
+        cfg.accumulate = True
     cfg.device = auto_device(args.device or cfg.device)
 
     history, real_ref = run_collapse(cfg, save_dir=args.save_dir)
