@@ -1,6 +1,6 @@
 """Causal tests of the next-symbol choice (the behaviour that collapses).
 
-    python scripts/choice_circuit.py [results/v2] [--n 3000]
+    python scripts/choice_circuit.py [results/v2] [--n 10000]
 
 mechanism.py scores layer ablations and path patching on the query label, which
 never degrades. This runs the same interventions on every extended model but
@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 
-from src.collapse import REAL_EVAL_SEED, real_dataset
+from src.collapse import REAL_EVAL_SEED, REAL_EVAL_SIZE, real_dataset
 from src.patching import corrupt, run
 from src.train import load_checkpoint, set_threads
 
@@ -117,7 +117,7 @@ def analyse(model, cfg, seq, mech):
 def main():
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("root", nargs="?", default="results/v2")
-    p.add_argument("--n", type=int, default=3000)
+    p.add_argument("--n", type=int, default=REAL_EVAL_SIZE)
     p.add_argument("--threads", type=int, default=None)
     args = p.parse_args()
     set_threads(args.threads)

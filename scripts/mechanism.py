@@ -2,7 +2,9 @@
 
     python scripts/mechanism.py results/v2/ext_t1 [--threads 6]
 
-For each gen*.pt it runs, on held-out real data:
+For each gen*.pt it runs, on the 10,000 held-out real sequences every
+generation is scored on (REAL_EVAL_SEED; the same set as collapse.json's
+real_eval and every other analysis):
 
   query circuit    resample vs zero ablation of every head, resampling a whole
                    layer, and path patching of each layer-0 head into layer 1's
@@ -26,9 +28,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import torch
 
-from src.collapse import REAL_EVAL_SEED, real_dataset
+from src.collapse import REAL_EVAL_SEED, REAL_EVAL_SIZE, real_dataset
 from src.patching import check_run_matches, choice_mechanism, query_circuit_tests
-from src.train import TEST_SEED, auto_device, fixed_split, load_checkpoint, set_threads
+from src.train import auto_device, load_checkpoint, set_threads
 
 
 def gen_number(path):
@@ -40,7 +42,8 @@ def main():
     p.add_argument("run_dir")
     p.add_argument("--device", default=None)
     p.add_argument("--threads", type=int, default=None)
-    p.add_argument("--n_choice", type=int, default=3000, help="real sequences for the choice analysis")
+    p.add_argument("--n", type=int, default=REAL_EVAL_SIZE, help="real evaluation sequences (default: all)")
+    p.add_argument("--batch", type=int, default=1000)
     args = p.parse_args()
     set_threads(args.threads)
     device = auto_device(args.device)
@@ -49,11 +52,13 @@ def main():
     rows = []
     for path in paths:
         model, cfg, _ = load_checkpoint(path, device=device)
-        batches = fixed_split(cfg, TEST_SEED)[:10]
+        data = real_dataset(cfg, REAL_EVAL_SEED, args.n)
+        q = 2 * cfg.n_pairs
+        batches = [(data[i:i + args.batch, : q + 1].to(device), data[i:i + args.batch, q + 1].to(device))
+                   for i in range(0, data.shape[0], args.batch)]
         assert check_run_matches(model, batches[0][0]) < 1e-3, "patched forward does not match the model"
         rec = {"gen": gen_number(path), "query_circuit": query_circuit_tests(model, cfg, batches)}
         if cfg.variant == "extended":
-            data = real_dataset(cfg, REAL_EVAL_SEED, args.n_choice)
             rec["choice"] = choice_mechanism(model, cfg, data)
         rows.append(rec)
 

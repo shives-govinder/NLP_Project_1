@@ -3,9 +3,10 @@
     python scripts/leakage_fit.py [results/v2]
 
 x is measured on held-out real data each generation (collapse.json real_eval):
-leakage p_out = next_symbol_mass_out, misallocation = KL + log(1 - p_out) (Eq. 1).
+leakage = -log(1 - p_out) in nats, misallocation = KL - leakage (Eq. 1).
 alpha is the restoring force: 0 means nothing pulls x back, so it grows by delta
-per generation; mixing a share r of real rows (p_out = 0) predicts alpha = r.
+per generation; mixing a share r of real rows (p_out = 0) predicts alpha ~ r
+(exactly for p_out, and to first order for leakage in nats, which is ~p_out when small).
 When alpha > 0 the fixed point is delta / alpha.
 
 Writes leakage_fit.json into the results folder and prints a table.
@@ -16,7 +17,8 @@ import sys
 
 import numpy as np
 
-CHAINS = ["ext_t1", "ext_t1_s100", "ext_real10", "ext_t07"]
+CHAINS = ["ext_t1", "ext_t1_s100", "ext_real10", "ext_t07",
+          "ext_long", "ext_t07_s100", "ext_real10_s100", "ext_genctx", "ext_accum"]   # missing ones are skipped
 
 
 def fit(x):
@@ -35,11 +37,14 @@ def main():
     out = {}
     print(f"{'chain':<12} {'measure':<14} {'alpha':>7} {'delta':>8} {'R2':>6} {'fixed pt':>8}")
     for run in CHAINS:
+        if not os.path.exists(os.path.join(root, run, "collapse.json")):
+            continue
         with open(os.path.join(root, run, "collapse.json")) as f:
             gens = json.load(f)["generations"]
         p_out = np.array([g["real_eval"]["next_symbol_mass_out"] for g in gens])
         kl = np.array([g["real_eval"]["next_symbol_kl"] for g in gens])
-        series = {"leakage_p_out": p_out, "misallocation": kl + np.log(1 - p_out)}
+        leak = -np.log(1 - p_out)
+        series = {"leakage": leak, "misallocation": kl - leak}
         out[run] = {}
         for name, x in series.items():
             r = fit(x)

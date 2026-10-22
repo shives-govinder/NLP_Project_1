@@ -106,12 +106,12 @@ def collapse_panels(profiles, a=None, b=None, c=None, d=None, letters="abcd"):
     for i, (run, label) in enumerate(CHAINS):
         rows = profiles[run]
         g = [r["gen"] for r in rows]
-        for ax, key in ((a, "mass_out"), (b, "kl_in"), (c, "slope")):
+        for ax, key in ((a, "leak"), (b, "kl_in"), (c, "slope")):
             if ax is not None:
                 line(ax, g, [r[key] for r in rows], i, label)
 
     if a is not None:
-        style(a, f"({letters[0]}) Leakage out of the context", "probability on absent symbols (real: 0)")
+        style(a, f"({letters[0]}) Leakage out of the context", "leakage (nats; real data: 0)")
         a.set_ylim(bottom=0)
     if b is not None:
         style(b, f"({letters[1]}) Misallocation within the context", "KL within context (nats, log scale)")
