@@ -63,7 +63,7 @@ def main():
                             for i in range(0, len(data), 2000)])
 
     trained = {}
-    for name in ("choice_profiles.json", "revision_profiles.json"):
+    for name in ("choice_profiles.json", "revision_profiles.json", "seed_profiles.json"):
         path = os.path.join(os.path.dirname(run), name)
         if os.path.exists(path):
             with open(path) as f:

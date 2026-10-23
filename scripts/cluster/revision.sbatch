@@ -1,5 +1,5 @@
 #!/bin/bash
-# Chains added after review, one array task per chain (SLURM).
+# Additional chains, one array task per chain (SLURM).
 #
 #   sbatch --array=1-4 scripts/cluster/revision.sbatch                         # 8,000-step chains (batch)
 #   sbatch --array=0 --partition=stampede --cpus-per-task=8 --time=3-00:00:00 \

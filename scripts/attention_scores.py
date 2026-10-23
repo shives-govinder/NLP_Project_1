@@ -28,7 +28,9 @@ from src.patching import run
 from src.train import load_checkpoint
 
 CHAINS = ["base", "ext_t1", "ext_t1_s100", "ext_real10", "ext_t07",
-          "ext_long", "ext_t07_s100", "ext_real10_s100", "ext_genctx", "ext_accum"]   # missing ones are skipped
+          "ext_long", "ext_t07_s100", "ext_real10_s100", "ext_genctx", "ext_accum",
+          "ext_t1_s200", "ext_t1_s300", "ext_t1_s400", "ext_t07_s200", "ext_t07_s300", "ext_t07_s400",
+          "ext_real10_s200", "ext_real10_s300", "ext_real10_s400"]   # missing ones are skipped
 
 
 @torch.no_grad()

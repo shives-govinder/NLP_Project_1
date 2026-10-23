@@ -1,5 +1,5 @@
 #!/bin/bash
-# Analysis of the revision chains, after revision.sbatch has finished:
+# Analysis of the additional chains, after revision.sbatch has finished:
 #
 #   sbatch --dependency=afterok:<chains job>:<ext_long job> scripts/cluster/revision_analysis.sbatch
 #

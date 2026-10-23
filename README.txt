@@ -35,7 +35,9 @@ and extended collapse) and must end with "SMOKE TEST PASSED".
 
 The JSON summaries, logs and figures of every run are already in results/v2/,
 so step 3f alone redraws the figures without retraining. Model checkpoints
-(*.pt) are too large for the repository; steps 3a to 3e recreate them.
+(gen*.pt) and training data (data_gen*.pt) are included for the first five
+chains (base, ext_t1, ext_t1_s100, ext_t07, ext_real10); the other chains keep
+only their JSON summaries, and steps 3a to 3e recreate their checkpoints.
 
 Shared settings: 32 symbols, 8 labels, 8 pairs per sequence, 4 distinct
 symbols per sequence (--n_unique 4), loss on every repeated symbol
@@ -61,7 +63,7 @@ held-out real sequences.
     statistics of the generated data) into its folder. Each chain takes a few
     hours on 8 CPU cores.
 
-3a'. Chains added after review (25,000-step budget ablation, second seeds for
+3a'. Additional chains (25,000-step budget ablation, second seeds for
     T = 0.7 and 10% real data, generated contexts, accumulated data):
 
     On the Wits mscluster, from the repo root, with a venv at .venv
@@ -77,6 +79,19 @@ held-out real sequences.
     sbatch --dependency=afterok:<job ids> scripts/cluster/revision_analysis.sbatch
                                                       (choice profiles -> revision_profiles.json,
                                                        choice_circuit.json for these chains)
+
+    Three more seeds (200, 300, 400) for each main condition, and every pooled
+    analysis rerun once over all chains on the same 10,000-sequence set:
+
+    sbatch scripts/cluster/seeds.sbatch
+    sbatch --dependency=afterok:<job> scripts/cluster/seeds_analysis.sbatch
+
+    Circuit tests of the first ten chains rerun on the same 10,000-sequence
+    evaluation set, then the choice-circuit tests, attention scores and
+    leakage fit:
+
+    sbatch scripts/cluster/consistency.sbatch
+    sbatch --dependency=afterok:<job> scripts/cluster/consistency_analysis.sbatch
 
     --gen_context makes the model write the whole sequence (loss on every
     token); collapse.json then also holds exact context KLs (real_eval) and
@@ -124,8 +139,13 @@ held-out real sequences.
 
 3f. Figures for the abstract:
 
-    python scripts/paper_figures.py      -> results/v2/figures/fig_collapse.png,
+    python scripts/paper_figures.py      -> results/v2/figures/fig_main.png, fig_collapse.png,
                                             fig_interventions.png, fig_training.png
+    (fig_embeddings.png comes from scripts/embeddings.py, step 3e)
+
+    The paper reads its figures from paper/images/; copy the new ones there:
+
+    cp results/v2/figures/*.png paper/images/
 
     fig_collapse.png needs results/v2/choice_profiles.json (in the repository);
     if it is deleted, the script recomputes it from the gen*.pt checkpoints.
@@ -153,6 +173,16 @@ held-out real sequences.
                        interpretability (interpret.py) and causal tests (patching.py)
     scripts/           experiments, analysis and figures (see each file's docstring)
     results/v2/        JSON summaries, logs and figures of the reported runs
+    paper/             LaTeX source of the extended abstract (ccn_style.tex), the
+                       NeurIPS checklist (neurips_checklist.tex) and the signed
+                       AI ethics declaration (ai_declaration.pdf)
 
-README.md has the same information with more background; CONTEXT.md is the
-project's running research log.
+
+6. BUILDING THE EXTENDED ABSTRACT
+---------------------------------
+
+    cd paper
+    pdflatex ccn_style && bibtex ccn_style && pdflatex ccn_style && pdflatex ccn_style
+
+or upload the paper/ folder to Overleaf (pdfLaTeX). The checklist and the AI
+ethics declaration are pulled in automatically after the references.
